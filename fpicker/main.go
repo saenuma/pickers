@@ -44,7 +44,7 @@ func main() {
 
 	objCoords = make(map[int]g143.RectSpecs)
 
-	window := g143.NewWindow(1200, 800, "Videos349 file picker", false)
+	window := g143.NewWindow(1200, 800, "sae.ng file picker", false)
 	allDraws(window, toPickFrom)
 
 	// respond to the mouse
