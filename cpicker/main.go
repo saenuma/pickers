@@ -27,16 +27,10 @@ func main() {
 
 	objCoords = make(map[int]g143.RectSpecs)
 
-	// colors := make([]map[string]string, 0)
-	// json.Unmarshal(ColorJson, &colors)
-	// for _, obj := range colors {
-	// 	hexColors = append(hexColors, obj["hex"])
-	// }
-
 	colors := strings.Split(string(Colors2), "\n")
 
 	allColors = colors
-	window := g143.NewWindow(1200, 800, "sae.ng color picker", false)
+	window := g143.NewWindow(1350, 700, "sae.ng color picker", false)
 	allDraws(window, colors)
 
 	// respond to the mouse
@@ -68,10 +62,11 @@ func allDraws(window *glfw.Window, colors []string) {
 		panic(err)
 	}
 
-	currentX := 5
-	currentY := 5
+	gutter := 10
+	currentX := gutter
+	currentY := gutter
 
-	boxDimension := 20
+	boxDimension := 55
 	for i, aColor := range colors {
 		ggCtx.SetHexColor(aColor)
 		ggCtx.DrawRectangle(float64(currentX), float64(currentY), float64(boxDimension), float64(boxDimension))
@@ -79,12 +74,12 @@ func allDraws(window *glfw.Window, colors []string) {
 		aColorRS := g143.RectSpecs{OriginX: currentX, OriginY: currentY, Width: boxDimension, Height: boxDimension}
 		objCoords[i+1] = aColorRS
 
-		newX := currentX + boxDimension + 5
+		newX := currentX + boxDimension + gutter
 		if newX > (wWidth - boxDimension) {
-			currentY += boxDimension + 5
-			currentX = 5
+			currentY += boxDimension + gutter
+			currentX = gutter
 		} else {
-			currentX += boxDimension + 5
+			currentX += boxDimension + gutter
 		}
 
 	}
