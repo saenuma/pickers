@@ -1,12 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
-	"sort"
+	"strings"
 	"time"
 
 	g143 "github.com/bankole7782/graphics143"
@@ -28,16 +27,17 @@ func main() {
 
 	objCoords = make(map[int]g143.RectSpecs)
 
-	colors := make([]map[string]string, 0)
-	json.Unmarshal(ColorJson, &colors)
-	hexColors := make([]string, 0)
-	for _, obj := range colors {
-		hexColors = append(hexColors, obj["hex"])
-	}
-	sort.Strings(hexColors)
-	allColors = hexColors
-	window := g143.NewWindow(1300, 800, "sae.ng color picker", false)
-	allDraws(window, hexColors)
+	// colors := make([]map[string]string, 0)
+	// json.Unmarshal(ColorJson, &colors)
+	// for _, obj := range colors {
+	// 	hexColors = append(hexColors, obj["hex"])
+	// }
+
+	colors := strings.Split(string(Colors2), "\n")
+
+	allColors = colors
+	window := g143.NewWindow(1200, 800, "sae.ng color picker", false)
+	allDraws(window, colors)
 
 	// respond to the mouse
 	window.SetMouseButtonCallback(mouseBtnCallback)
@@ -71,7 +71,7 @@ func allDraws(window *glfw.Window, colors []string) {
 	currentX := 5
 	currentY := 5
 
-	boxDimension := 30
+	boxDimension := 20
 	for i, aColor := range colors {
 		ggCtx.SetHexColor(aColor)
 		ggCtx.DrawRectangle(float64(currentX), float64(currentY), float64(boxDimension), float64(boxDimension))
