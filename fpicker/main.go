@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
-	"slices"
+	"sort"
 	"strings"
 	"time"
 
@@ -21,31 +22,25 @@ const (
 
 var objCoords map[int]g143.RectSpecs
 
-var allFiles []string
+var rootPath string
+var basePath string
+var exts string
+var currentPageNum int
 
 func main() {
 	if len(os.Args) != 3 {
 		panic("expecting a rootpath and a extension")
 	}
-	rootPath := os.Args[1]
-	exts := os.Args[2]
-	extsParts := strings.Split(exts, "|")
-
-	toPickFrom := make([]string, 0)
-	for _, extPart := range extsParts {
-		tmp := GetFilesOfType(rootPath, extPart)
-		toPickFrom = append(toPickFrom, tmp...)
-	}
-
-	slices.Sort(toPickFrom)
-	allFiles = toPickFrom
+	rootPath = os.Args[1]
+	exts = os.Args[2]
+	basePath = rootPath
 
 	runtime.LockOSThread()
 
 	objCoords = make(map[int]g143.RectSpecs)
 
 	window := g143.NewWindow(1200, 800, "sae.ng file picker", false)
-	allDraws(window, toPickFrom)
+	allDraws(window)
 
 	// respond to the mouse
 	window.SetMouseButtonCallback(mouseBtnCallback)
@@ -58,38 +53,58 @@ func main() {
 	}
 }
 
-func GetFilesOfType(rootPath, ext string) []string {
-	dirFIs, err := os.ReadDir(rootPath)
+func getObjects(rootPath, mergedExts string) []string {
+	dirEs, err := os.ReadDir(rootPath)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return []string{}
 	}
-	files := make([]string, 0)
-	for _, dirFI := range dirFIs {
-		if !dirFI.IsDir() && !strings.HasPrefix(dirFI.Name(), ".") && strings.HasSuffix(dirFI.Name(), ext) {
-			files = append(files, dirFI.Name())
+
+	extsParts := make([]string, 0)
+	if mergedExts != "*" {
+		extsParts = strings.Split(mergedExts, "|")
+	}
+
+	allFolders := make([]string, 0)
+	allFiles := make([]string, 0)
+	for _, dirE := range dirEs {
+		if dirE.IsDir() {
+			allFolders = append(allFolders, dirE.Name()+"/")
+			continue
 		}
 
-		if dirFI.IsDir() && !strings.HasPrefix(dirFI.Name(), ".") {
-			innerDirFIs, _ := os.ReadDir(filepath.Join(rootPath, dirFI.Name()))
-			innerFiles := make([]string, 0)
-
-			for _, innerDirFI := range innerDirFIs {
-				if !innerDirFI.IsDir() && !strings.HasPrefix(innerDirFI.Name(), ".") && strings.HasSuffix(innerDirFI.Name(), ext) {
-					innerFiles = append(innerFiles, filepath.Join(dirFI.Name(), innerDirFI.Name()))
+		if mergedExts == "*" {
+			allFiles = append(allFiles, dirE.Name())
+		} else {
+			for _, ext := range extsParts {
+				if !strings.HasPrefix(dirE.Name(), ".") && strings.HasSuffix(dirE.Name(), ext) {
+					allFiles = append(allFiles, dirE.Name())
 				}
 			}
 
-			if len(innerFiles) > 0 {
-				files = append(files, innerFiles...)
-			}
 		}
 
 	}
 
-	return files
+	sort.Strings(allFolders)
+	sort.Strings(allFiles)
+	return append(allFolders, allFiles...)
 }
 
-func allDraws(window *glfw.Window, files []string) {
+func shortenObject(object string) string {
+	var tmp string
+	if len(object) > 40 {
+		tmp = object[0:34] + "..." + object[len(object)-6:]
+	} else {
+		tmp = object
+	}
+
+	return tmp
+}
+
+func allDraws(window *glfw.Window) {
+	toPickFrom := getObjects(basePath, exts)
+
 	wWidth, wHeight := window.GetSize()
 
 	// frame buffer
@@ -102,19 +117,28 @@ func allDraws(window *glfw.Window, files []string) {
 
 	// load font
 	fontPath := getDefaultFontPath()
-	err := ggCtx.LoadFontFace(fontPath, 20)
-	if err != nil {
-		panic(err)
-	}
+	ggCtx.LoadFontFace(fontPath, 30)
+
+	ggCtx.SetHexColor("#444")
+	ggCtx.DrawString(basePath, 20, 5+30)
+
+	ggCtx.LoadFontFace(fontPath, 20)
 
 	currentX := 20
-	currentY := 20
+	currentY := 50
 
-	for i, aFile := range files {
-		aFileStrW, _ := ggCtx.MeasureString(aFile)
+	for i, aFile := range toPickFrom {
+		shortAFile := shortenObject(aFile)
+		aFileStrW, _ := ggCtx.MeasureString(shortAFile)
 
-		ggCtx.SetHexColor("#444")
-		ggCtx.DrawString(aFile, float64(currentX), float64(currentY)+fontSize)
+		if strings.HasSuffix(aFile, "/") {
+			ggCtx.SetHexColor("#305E44")
+			ggCtx.DrawString(shortAFile, float64(currentX), float64(currentY)+fontSize)
+		} else {
+			ggCtx.SetHexColor("#444")
+			ggCtx.DrawString(shortAFile, float64(currentX), float64(currentY)+fontSize)
+		}
+
 		aFileRS := g143.RectSpecs{OriginX: currentX, OriginY: currentY, Width: int(aFileStrW), Height: fontSize}
 		objCoords[i+1] = aFileRS
 
@@ -125,7 +149,6 @@ func allDraws(window *glfw.Window, files []string) {
 		} else {
 			currentX += int(aFileStrW) + 20 + 10
 		}
-
 	}
 
 	// send the frame to glfw window
@@ -135,7 +158,7 @@ func allDraws(window *glfw.Window, files []string) {
 }
 
 func getDefaultFontPath() string {
-	fontPath := filepath.Join(os.TempDir(), "fpicker_font.ttf")
+	fontPath := filepath.Join(os.TempDir(), "font.ttf")
 	os.WriteFile(fontPath, DefaultFont, 0777)
 	return fontPath
 }
@@ -166,6 +189,16 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		return
 	}
 
-	fmt.Println(allFiles[widgetCode-1])
-	window.SetShouldClose(true)
+	toPickFrom := getObjects(basePath, exts)
+	foundObject := toPickFrom[widgetCode-1]
+
+	if strings.HasSuffix(foundObject, "/") {
+		objCoords = make(map[int]g143.RectSpecs)
+		basePath = filepath.Join(basePath, foundObject)
+		allDraws(window)
+	} else {
+		fmt.Println(filepath.Join(basePath, foundObject))
+		window.SetShouldClose(true)
+
+	}
 }
