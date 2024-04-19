@@ -21,7 +21,7 @@ const (
 	fps      = 10
 	fontSize = 20
 
-	BackBtn = 101
+	BackBtn = 9801
 )
 
 var objCoords map[int]g143.RectSpecs
@@ -202,12 +202,18 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 
 	if widgetCode == BackBtn {
 		tmp := filepath.Dir(basePath)
-		if strings.Count(rootPath, "/") != strings.Count(tmp, "/") {
+		var rootPathTmp string
+		if strings.HasSuffix(rootPath, "/") {
+			rootPathTmp = rootPath[:len(rootPath)-1]
+		}
+
+		if strings.Count(rootPathTmp, "/") < strings.Count(tmp, "/")+1 {
 			objCoords = make(map[int]g143.RectSpecs)
 			basePath = tmp
 			allDraws(window)
-			return
 		}
+
+		return
 	}
 
 	toPickFrom := getObjects(basePath, exts)
@@ -256,6 +262,9 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 		allDraws(window)
 		return
 	}
+	if widgetCode == BackBtn {
+		return
+	}
 
 	toPickFrom := getObjects(basePath, exts)
 	foundObject := toPickFrom[widgetCode-1]
@@ -284,8 +293,18 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 	objCoords = make(map[int]g143.RectSpecs)
 	allDraws(window)
 
+	previewX := xPosInt + 10
+	if previewX+previewImgBoxSize > wWidth {
+		previewX = xPosInt - previewImgBoxSize - 10
+	}
+
+	previewY := yPosInt + 10
+	if previewY+previewImgBoxSize > wHeight {
+		previewY = yPosInt - previewImgBoxSize - 10
+	}
+
 	ggCtx := gg.NewContextForImage(tmpPickerFrame)
-	ggCtx.DrawImage(foundImg, xPosInt+10, yPosInt+10)
+	ggCtx.DrawImage(foundImg, previewX, previewY)
 	ggCtx.Fill()
 
 	// send the frame to glfw window
