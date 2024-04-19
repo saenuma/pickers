@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	g143 "github.com/bankole7782/graphics143"
+	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -27,6 +29,8 @@ var objCoords map[int]g143.RectSpecs
 var rootPath string
 var basePath string
 var exts string
+
+var tmpPickerFrame image.Image
 
 func main() {
 	if len(os.Args) != 3 {
@@ -45,6 +49,7 @@ func main() {
 
 	// respond to the mouse
 	window.SetMouseButtonCallback(mouseBtnCallback)
+	window.SetCursorPosCallback(cursorCallback)
 
 	for !window.ShouldClose() {
 		t := time.Now()
@@ -159,6 +164,8 @@ func allDraws(window *glfw.Window) {
 	windowRS := g143.RectSpecs{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
 	g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
 	window.SwapBuffers()
+
+	tmpPickerFrame = ggCtx.Image()
 }
 
 func getDefaultFontPath() string {
@@ -215,4 +222,75 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		window.SetShouldClose(true)
 
 	}
+}
+
+var cursorEventsCount = 0
+
+func cursorCallback(window *glfw.Window, xpos, ypos float64) {
+	if runtime.GOOS == "linux" {
+		// linux fires too many events
+		cursorEventsCount += 1
+		if cursorEventsCount != 10 {
+			return
+		} else {
+			cursorEventsCount = 0
+		}
+	}
+
+	wWidth, wHeight := window.GetSize()
+
+	// var widgetRS g143.RectSpecs
+	var widgetCode int
+
+	xPosInt := int(xpos)
+	yPosInt := int(ypos)
+	for code, RS := range objCoords {
+		if g143.InRectSpecs(RS, xPosInt, yPosInt) {
+			// widgetRS = RS
+			widgetCode = code
+			break
+		}
+	}
+
+	if widgetCode == 0 {
+		allDraws(window)
+		return
+	}
+
+	toPickFrom := getObjects(basePath, exts)
+	foundObject := toPickFrom[widgetCode-1]
+
+	if strings.HasSuffix(foundObject, "/") {
+		allDraws(window)
+		return
+	}
+
+	foundObjectPath := filepath.Join(basePath, foundObject)
+
+	if !strings.HasSuffix(foundObject, ".jpg") && !strings.HasSuffix(foundObject, ".png") {
+		allDraws(window)
+		return
+	}
+
+	foundImg, err := imaging.Open(foundObjectPath)
+	if err != nil {
+		allDraws(window)
+		return
+	}
+	previewImgBoxSize := 300
+
+	foundImg = imaging.Fit(foundImg, previewImgBoxSize, previewImgBoxSize, imaging.Lanczos)
+
+	objCoords = make(map[int]g143.RectSpecs)
+	allDraws(window)
+
+	ggCtx := gg.NewContextForImage(tmpPickerFrame)
+	ggCtx.DrawImage(foundImg, xPosInt+10, yPosInt+10)
+	ggCtx.Fill()
+
+	// send the frame to glfw window
+	windowRS := g143.RectSpecs{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
+	g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
+	window.SwapBuffers()
+
 }
