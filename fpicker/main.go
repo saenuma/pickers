@@ -71,7 +71,7 @@ func getObjects(rootPath, mergedExts string) []string {
 	allFolders := make([]string, 0)
 	allFiles := make([]string, 0)
 	for _, dirE := range dirEs {
-		if dirE.IsDir() {
+		if !strings.HasPrefix(dirE.Name(), ".") && dirE.IsDir() {
 			allFolders = append(allFolders, dirE.Name()+"/")
 			continue
 		}
