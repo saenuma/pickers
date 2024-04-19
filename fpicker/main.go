@@ -18,6 +18,8 @@ import (
 const (
 	fps      = 10
 	fontSize = 20
+
+	BackBtn = 101
 )
 
 var objCoords map[int]g143.RectSpecs
@@ -25,7 +27,6 @@ var objCoords map[int]g143.RectSpecs
 var rootPath string
 var basePath string
 var exts string
-var currentPageNum int
 
 func main() {
 	if len(os.Args) != 3 {
@@ -60,10 +61,7 @@ func getObjects(rootPath, mergedExts string) []string {
 		return []string{}
 	}
 
-	extsParts := make([]string, 0)
-	if mergedExts != "*" {
-		extsParts = strings.Split(mergedExts, "|")
-	}
+	extsParts := strings.Split(mergedExts, "|")
 
 	allFolders := make([]string, 0)
 	allFiles := make([]string, 0)
@@ -73,15 +71,10 @@ func getObjects(rootPath, mergedExts string) []string {
 			continue
 		}
 
-		if mergedExts == "*" {
-			allFiles = append(allFiles, dirE.Name())
-		} else {
-			for _, ext := range extsParts {
-				if !strings.HasPrefix(dirE.Name(), ".") && strings.HasSuffix(dirE.Name(), ext) {
-					allFiles = append(allFiles, dirE.Name())
-				}
+		for _, ext := range extsParts {
+			if !strings.HasPrefix(dirE.Name(), ".") && strings.HasSuffix(dirE.Name(), ext) {
+				allFiles = append(allFiles, dirE.Name())
 			}
-
 		}
 
 	}
@@ -117,12 +110,23 @@ func allDraws(window *glfw.Window) {
 
 	// load font
 	fontPath := getDefaultFontPath()
-	ggCtx.LoadFontFace(fontPath, 30)
+	ggCtx.LoadFontFace(fontPath, 20)
 
 	ggCtx.SetHexColor("#444")
-	ggCtx.DrawString(basePath, 20, 5+30)
+	ggCtx.DrawRectangle(20, 5, 30, 30)
+	ggCtx.Fill()
+	objCoords[BackBtn] = g143.NRectSpecs(20, 5, 30, 30)
 
-	ggCtx.LoadFontFace(fontPath, 20)
+	ggCtx.SetHexColor("#fff")
+	ggCtx.DrawString("<", 30, 5+fontSize)
+
+	ggCtx.SetHexColor("#444")
+	ggCtx.DrawString(basePath, 60, 5+20)
+
+	// draw divider
+	ggCtx.SetHexColor("#bbb")
+	ggCtx.DrawRectangle(5, 40, float64(wWidth)-10, 2)
+	ggCtx.Fill()
 
 	currentX := 20
 	currentY := 50
@@ -187,6 +191,16 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 
 	if widgetCode == 0 {
 		return
+	}
+
+	if widgetCode == BackBtn {
+		tmp := filepath.Dir(basePath)
+		if strings.Count(rootPath, "/") != strings.Count(tmp, "/") {
+			objCoords = make(map[int]g143.RectSpecs)
+			basePath = tmp
+			allDraws(window)
+			return
+		}
 	}
 
 	toPickFrom := getObjects(basePath, exts)
