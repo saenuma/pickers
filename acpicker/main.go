@@ -9,6 +9,7 @@ import (
 	"time"
 
 	g143 "github.com/bankole7782/graphics143"
+	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
@@ -26,6 +27,7 @@ var objCoords map[int]g143.RectSpecs
 var tmpFrame image.Image
 var pickedColor string
 var currentHue int
+var CursorEventsCount int
 
 func main() {
 	runtime.LockOSThread()
@@ -37,6 +39,7 @@ func main() {
 
 	// respond to the mouse
 	window.SetMouseButtonCallback(mouseBtnCallback)
+	window.SetCursorPosCallback(CursorPosCB)
 
 	for !window.ShouldClose() {
 		t := time.Now()
@@ -152,6 +155,8 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
 		window.SwapBuffers()
 
+		tmpFrame = ggCtx.Image()
+
 	case SelectBtn:
 		if pickedColor != "" {
 			fmt.Println(pickedColor)
@@ -159,4 +164,56 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		}
 
 	}
+}
+
+func CursorPosCB(window *glfw.Window, xpos, ypos float64) {
+	if runtime.GOOS == "linux" {
+		// linux fires too many events
+		CursorEventsCount += 1
+		if CursorEventsCount != 10 {
+			return
+		} else {
+			CursorEventsCount = 0
+		}
+	}
+
+	wWidth, wHeight := window.GetSize()
+
+	var widgetRS g143.RectSpecs
+	var widgetCode int
+
+	xPosInt := int(xpos)
+	yPosInt := int(ypos)
+	for code, RS := range objCoords {
+		if g143.InRectSpecs(RS, xPosInt, yPosInt) {
+			widgetRS = RS
+			widgetCode = code
+			break
+		}
+	}
+
+	if widgetCode == SelectBtn {
+		rectA := image.Rect(widgetRS.OriginX, widgetRS.OriginY,
+			widgetRS.OriginX+widgetRS.Width,
+			widgetRS.OriginY+widgetRS.Height)
+
+		pieceOfCurrentFrame := imaging.Crop(tmpFrame, rectA)
+		invertedPiece := imaging.AdjustBrightness(pieceOfCurrentFrame, -20)
+
+		ggCtx := gg.NewContextForImage(tmpFrame)
+		ggCtx.DrawImage(invertedPiece, widgetRS.OriginX, widgetRS.OriginY)
+
+		// send the frame to glfw window
+		windowRS := g143.RectSpecs{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
+		g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
+		window.SwapBuffers()
+
+	} else {
+		// send the last drawn frame to glfw window
+		windowRS := g143.RectSpecs{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
+		g143.DrawImage(wWidth, wHeight, tmpFrame, windowRS)
+		window.SwapBuffers()
+		return
+	}
+
 }
