@@ -34,7 +34,7 @@ func main() {
 
 	objCoords = make(map[int]g143.RectSpecs)
 
-	window := g143.NewWindow(500, 500, "sae.ng color picker", false)
+	window := g143.NewWindow(500, 500, "sae.ng all colors picker", false)
 	allDraws(window, 0)
 
 	// respond to the mouse
