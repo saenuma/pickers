@@ -7,6 +7,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/fogleman/gg v1.3.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240307211618-a69d953ea142
+	github.com/lucasb-eyer/go-colorful v1.2.0
 )
 
 require (
