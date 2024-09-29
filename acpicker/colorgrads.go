@@ -37,7 +37,7 @@ func allColorImg2(hue int) *image.RGBA {
 			h := float64(hue)
 			l := math.Abs(float64(x)/float64(width) - 1.0)
 			s := math.Abs(float64(y)/float64(height) - 1.0)
-			r, g, b := colorful.Hsl(h, s, l).RGB255()
+			r, g, b := colorful.Hsv(h, s, l).RGB255()
 			img.Set(x, y, color.RGBA{r, g, b, 255})
 		}
 	}
