@@ -24,7 +24,7 @@ const (
 	BackBtn = 9801
 )
 
-var objCoords map[int]g143.RectSpecs
+var objCoords map[int]g143.Rect
 
 var rootPath string
 var basePath string
@@ -42,7 +42,7 @@ func main() {
 
 	runtime.LockOSThread()
 
-	objCoords = make(map[int]g143.RectSpecs)
+	objCoords = make(map[int]g143.Rect)
 
 	window := g143.NewWindow(1200, 800, "sae.ng file picker", false)
 	allDraws(window)
@@ -120,7 +120,7 @@ func allDraws(window *glfw.Window) {
 	ggCtx.SetHexColor("#444")
 	ggCtx.DrawRectangle(20, 5, 30, 30)
 	ggCtx.Fill()
-	objCoords[BackBtn] = g143.NRectSpecs(20, 5, 30, 30)
+	objCoords[BackBtn] = g143.NewRect(20, 5, 30, 30)
 
 	ggCtx.SetHexColor("#fff")
 	ggCtx.DrawString("<", 30, 5+fontSize)
@@ -148,7 +148,7 @@ func allDraws(window *glfw.Window) {
 			ggCtx.DrawString(shortAFile, float64(currentX), float64(currentY)+fontSize)
 		}
 
-		aFileRS := g143.RectSpecs{OriginX: currentX, OriginY: currentY, Width: int(aFileStrW), Height: fontSize}
+		aFileRS := g143.Rect{OriginX: currentX, OriginY: currentY, Width: int(aFileStrW), Height: fontSize}
 		objCoords[i+1] = aFileRS
 
 		newX := currentX + int(aFileStrW) + 20
@@ -161,7 +161,7 @@ func allDraws(window *glfw.Window) {
 	}
 
 	// send the frame to glfw window
-	windowRS := g143.RectSpecs{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
+	windowRS := g143.Rect{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
 	g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
 	window.SwapBuffers()
 
@@ -185,11 +185,11 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 
 	// wWidth, wHeight := window.GetSize()
 
-	// var widgetRS g143.RectSpecs
+	// var widgetRS g143.Rect
 	var widgetCode int
 
 	for code, RS := range objCoords {
-		if g143.InRectSpecs(RS, xPosInt, yPosInt) {
+		if g143.InRect(RS, xPosInt, yPosInt) {
 			// widgetRS = RS
 			widgetCode = code
 			break
@@ -208,7 +208,7 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		}
 
 		if strings.Count(rootPathTmp, "/") < strings.Count(tmp, "/")+1 {
-			objCoords = make(map[int]g143.RectSpecs)
+			objCoords = make(map[int]g143.Rect)
 			basePath = tmp
 			allDraws(window)
 		}
@@ -220,7 +220,7 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 	foundObject := toPickFrom[widgetCode-1]
 
 	if strings.HasSuffix(foundObject, "/") {
-		objCoords = make(map[int]g143.RectSpecs)
+		objCoords = make(map[int]g143.Rect)
 		basePath = filepath.Join(basePath, foundObject)
 		allDraws(window)
 	} else {
@@ -245,13 +245,13 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 
 	wWidth, wHeight := window.GetSize()
 
-	// var widgetRS g143.RectSpecs
+	// var widgetRS g143.Rect
 	var widgetCode int
 
 	xPosInt := int(xpos)
 	yPosInt := int(ypos)
 	for code, RS := range objCoords {
-		if g143.InRectSpecs(RS, xPosInt, yPosInt) {
+		if g143.InRect(RS, xPosInt, yPosInt) {
 			// widgetRS = RS
 			widgetCode = code
 			break
@@ -290,7 +290,7 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 
 	foundImg = imaging.Fit(foundImg, previewImgBoxSize, previewImgBoxSize, imaging.Lanczos)
 
-	objCoords = make(map[int]g143.RectSpecs)
+	objCoords = make(map[int]g143.Rect)
 	allDraws(window)
 
 	previewX := xPosInt + 10
@@ -308,7 +308,7 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 	ggCtx.Fill()
 
 	// send the frame to glfw window
-	windowRS := g143.RectSpecs{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
+	windowRS := g143.Rect{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
 	g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
 	window.SwapBuffers()
 

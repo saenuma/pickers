@@ -18,14 +18,14 @@ const (
 	fontSize = 20
 )
 
-var objCoords map[int]g143.RectSpecs
+var objCoords map[int]g143.Rect
 
 var allColors []string
 
 func main() {
 	runtime.LockOSThread()
 
-	objCoords = make(map[int]g143.RectSpecs)
+	objCoords = make(map[int]g143.Rect)
 
 	colors := strings.Split(string(Colors2), "\n")
 
@@ -71,7 +71,7 @@ func allDraws(window *glfw.Window, colors []string) {
 		ggCtx.SetHexColor(aColor)
 		ggCtx.DrawRectangle(float64(currentX), float64(currentY), float64(boxDimension), float64(boxDimension))
 		ggCtx.Fill()
-		aColorRS := g143.RectSpecs{OriginX: currentX, OriginY: currentY, Width: boxDimension, Height: boxDimension}
+		aColorRS := g143.Rect{OriginX: currentX, OriginY: currentY, Width: boxDimension, Height: boxDimension}
 		objCoords[i+1] = aColorRS
 
 		newX := currentX + boxDimension + gutter
@@ -85,7 +85,7 @@ func allDraws(window *glfw.Window, colors []string) {
 	}
 
 	// send the frame to glfw window
-	windowRS := g143.RectSpecs{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
+	windowRS := g143.Rect{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
 	g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
 	window.SwapBuffers()
 }
@@ -107,11 +107,11 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 
 	// wWidth, wHeight := window.GetSize()
 
-	// var widgetRS g143.RectSpecs
+	// var widgetRS g143.Rect
 	var widgetCode int
 
 	for code, RS := range objCoords {
-		if g143.InRectSpecs(RS, xPosInt, yPosInt) {
+		if g143.InRect(RS, xPosInt, yPosInt) {
 			// widgetRS = RS
 			widgetCode = code
 			break
