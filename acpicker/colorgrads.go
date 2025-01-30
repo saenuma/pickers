@@ -26,7 +26,7 @@ func allColorImg() *image.RGBA {
 	return img
 }
 
-func allColorImg2(hue int) *image.RGBA {
+func subsetColorImg(hue int) *image.RGBA {
 	width := 360
 	height := 360
 

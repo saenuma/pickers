@@ -97,7 +97,7 @@ func allDraws(window *glfw.Window, hue int) {
 	objCoords[AllColorBox] = g143.NewRect(10, 10, acImg.Rect.Dx(),
 		acImg.Rect.Dy())
 
-	acImg2 := allColorImg2(hue)
+	acImg2 := subsetColorImg(hue)
 	ggCtx.DrawImage(acImg2, 70, 10)
 	objCoords[AColorBox] = g143.NewRect(70, 10, acImg2.Rect.Dx(),
 		acImg2.Rect.Dy())
@@ -163,7 +163,7 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		xPtClicked := xPosInt - widgetRS.OriginX
 		yPtClicked := yPosInt - widgetRS.OriginY
 
-		acImg2 := allColorImg2(currentHue)
+		acImg2 := subsetColorImg(currentHue)
 		r, g, b, _ := acImg2.At(xPtClicked, yPtClicked).RGBA()
 		hexColor := fmt.Sprintf("#%02x%02x%02x", r/255, g/255, b/255)
 		pickedColor = hexColor
