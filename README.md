@@ -25,4 +25,7 @@ It doesn't expect any argument.
 ## All Color Picker
 The all colors picker is called `acpicker`. It should contain all colors.
 
-It doesn't expect any argument.
+It takes an optional coordinates arguments. The first for X and the second for Y.
+For example `acpicker 800 300`
+
+If no argument is given it is centered.

@@ -6,12 +6,14 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"time"
 
 	g143 "github.com/bankole7782/graphics143"
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/gookit/color"
 )
 
 const (
@@ -30,12 +32,34 @@ var currentHue int
 var CursorEventsCount int
 
 func main() {
+	changeLoc := false
+	var windowX, windowY int
+	if len(os.Args) == 3 {
+		changeLoc = true
+		xCoord, err := strconv.Atoi(os.Args[1])
+		if err != nil {
+			color.Red.Println("First argument X was not int")
+			os.Exit(1)
+		}
+
+		yCoord, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			color.Red.Println("Second argument Y was not int")
+			os.Exit(1)
+		}
+
+		windowX, windowY = xCoord, yCoord
+	}
+
 	runtime.LockOSThread()
 
 	objCoords = make(map[int]g143.Rect)
 
-	window := g143.NewWindow(500, 500, "sae.ng all colors picker", false)
+	window := g143.NewWindow(450, 430, "sae.ng all colors picker", false)
 	allDraws(window, 0)
+	if changeLoc {
+		window.SetPos(windowX, windowY)
+	}
 
 	// respond to the mouse
 	window.SetMouseButtonCallback(mouseBtnCallback)
@@ -69,25 +93,25 @@ func allDraws(window *glfw.Window, hue int) {
 
 	// draw color picker
 	acImg := allColorImg()
-	ggCtx.DrawImage(acImg, 20, 20)
-	objCoords[AllColorBox] = g143.NewRect(20, 20, acImg.Rect.Dx(),
+	ggCtx.DrawImage(acImg, 10, 10)
+	objCoords[AllColorBox] = g143.NewRect(10, 10, acImg.Rect.Dx(),
 		acImg.Rect.Dy())
 
 	acImg2 := allColorImg2(hue)
-	ggCtx.DrawImage(acImg2, 100, 20)
-	objCoords[AColorBox] = g143.NewRect(100, 20, acImg2.Rect.Dx(),
+	ggCtx.DrawImage(acImg2, 70, 10)
+	objCoords[AColorBox] = g143.NewRect(70, 10, acImg2.Rect.Dx(),
 		acImg2.Rect.Dy())
 
 	// draw picked button
 	pblW, _ := ggCtx.MeasureString("select")
 	ggCtx.SetHexColor("#666")
-	ggCtx.DrawRectangle(350, 400, pblW+20, 40)
+	ggCtx.DrawRectangle(350, 380, pblW+20, 40)
 	ggCtx.Fill()
 
-	objCoords[SelectBtn] = g143.NewRect(350, 400, int(pblW)+20, 40)
+	objCoords[SelectBtn] = g143.NewRect(350, 380, int(pblW)+20, 40)
 
 	ggCtx.SetHexColor("#fff")
-	ggCtx.DrawString("select", 360, 405+fontSize)
+	ggCtx.DrawString("select", 360, 385+fontSize)
 
 	// send the frame to glfw window
 	windowRS := g143.Rect{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
@@ -147,7 +171,7 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		ggCtx := gg.NewContextForImage(tmpFrame)
 
 		ggCtx.SetHexColor(hexColor)
-		ggCtx.DrawRectangle(100, 20+360+20, 200, 50)
+		ggCtx.DrawRectangle(100, 20+360, 200, 40)
 		ggCtx.Fill()
 
 		// send the frame to glfw window
