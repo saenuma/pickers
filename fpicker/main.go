@@ -89,12 +89,12 @@ func getObjects(rootPath, mergedExts string) []string {
 	return append(allFolders, allFiles...)
 }
 
-func shortenObject(object string) string {
+func shortenObject(filename string) string {
 	var tmp string
-	if len(object) > 40 {
-		tmp = object[0:34] + "..." + object[len(object)-6:]
+	if len(filename) > 30 {
+		tmp = filename[0:20] + "..." + filename[len(filename)-6:]
 	} else {
-		tmp = object
+		tmp = filename
 	}
 
 	return tmp
@@ -141,7 +141,7 @@ func allDraws(window *glfw.Window) {
 		aFileStrW, _ := ggCtx.MeasureString(shortAFile)
 
 		if strings.HasSuffix(aFile, "/") {
-			ggCtx.SetHexColor("#305E44")
+			ggCtx.SetHexColor("#9e9770")
 			ggCtx.DrawString(shortAFile, float64(currentX), float64(currentY)+fontSize)
 		} else {
 			ggCtx.SetHexColor("#444")
@@ -276,7 +276,14 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 
 	foundObjectPath := filepath.Join(basePath, foundObject)
 
-	if !strings.HasSuffix(foundObject, ".jpg") && !strings.HasSuffix(foundObject, ".png") {
+	isPicFormat := false
+	picFormats := []string{".jpg", ".jpeg", ".png", ".gif"}
+	for _, format := range picFormats {
+		if strings.HasSuffix(foundObject, format) {
+			isPicFormat = true
+		}
+	}
+	if !isPicFormat {
 		allDraws(window)
 		return
 	}
