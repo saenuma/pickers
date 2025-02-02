@@ -1,6 +1,6 @@
 module github.com/saenuma/pickers
 
-go 1.21.4
+go 1.23
 
 require (
 	github.com/bankole7782/graphics143 v1.0.0

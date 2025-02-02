@@ -62,8 +62,7 @@ func allDraws(window *glfw.Window) {
 
 	// save button
 	theCtx.drawButtonA(DoneBtn, wWidth-100, wHeight-50, "Done", "#fff", "#5c8f8c")
-	textRect := g143.NewRect(10, 10, wWidth-20, wHeight-70)
-	objCoords[MajorTextInput] = textRect
+	theCtx.drawTextInput(MajorTextInput, 10, 10, wWidth-20, wHeight-70, "")
 
 	// send the frame to glfw window
 	g143.DrawImage(wWidth, wHeight, theCtx.ggCtx.Image(), theCtx.windowRect())
