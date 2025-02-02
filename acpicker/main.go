@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strconv"
 	"time"
@@ -14,6 +13,7 @@ import (
 	"github.com/fogleman/gg"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/gookit/color"
+	"github.com/saenuma/pickers/internal"
 )
 
 const (
@@ -85,7 +85,7 @@ func allDraws(window *glfw.Window, hue int) {
 	ggCtx.Fill()
 
 	// load font
-	fontPath := getDefaultFontPath()
+	fontPath := internal.GetDefaultFontPath()
 	err := ggCtx.LoadFontFace(fontPath, 20)
 	if err != nil {
 		panic(err)
@@ -119,12 +119,6 @@ func allDraws(window *glfw.Window, hue int) {
 	window.SwapBuffers()
 
 	tmpFrame = ggCtx.Image()
-}
-
-func getDefaultFontPath() string {
-	fontPath := filepath.Join(os.TempDir(), "fpicker_font.ttf")
-	os.WriteFile(fontPath, DefaultFont, 0777)
-	return fontPath
 }
 
 func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {

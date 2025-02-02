@@ -15,6 +15,7 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
 	"github.com/go-gl/glfw/v3.3/glfw"
+	"github.com/saenuma/pickers/internal"
 )
 
 const (
@@ -114,7 +115,7 @@ func allDraws(window *glfw.Window) {
 	ggCtx.Fill()
 
 	// load font
-	fontPath := getDefaultFontPath()
+	fontPath := internal.GetDefaultFontPath()
 	ggCtx.LoadFontFace(fontPath, 20)
 
 	ggCtx.SetHexColor("#444")
@@ -166,12 +167,6 @@ func allDraws(window *glfw.Window) {
 	window.SwapBuffers()
 
 	tmpPickerFrame = ggCtx.Image()
-}
-
-func getDefaultFontPath() string {
-	fontPath := filepath.Join(os.TempDir(), "font.ttf")
-	os.WriteFile(fontPath, DefaultFont, 0777)
-	return fontPath
 }
 
 func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
