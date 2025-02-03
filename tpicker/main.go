@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"runtime"
 	"strconv"
@@ -45,10 +46,15 @@ func main() {
 	// window.SetCursorPosCallback(cursorCallback)
 	window.SetKeyCallback(mKeyCallback)
 	window.SetCharCallback(mCharCallback)
+	window.SetCloseCallback(func(w *glfw.Window) {
+		fmt.Println(enteredTxt)
+	})
 
 	for !window.ShouldClose() {
 		t := time.Now()
 		glfw.PollEvents()
+
+		displayCaret(window)
 
 		time.Sleep(time.Second/time.Duration(FPS) - time.Since(t))
 	}
@@ -59,9 +65,6 @@ func allDraws(window *glfw.Window) {
 	wWidth, wHeight := window.GetSize()
 
 	theCtx := New2dCtx(wWidth, wHeight, &objCoords)
-
-	// save button
-	theCtx.drawButtonA(DoneBtn, wWidth-100, wHeight-50, "Done", "#fff", "#5c8f8c")
 	theCtx.drawTextInput(MajorTextInput, 10, 10, wWidth-20, wHeight-70, "")
 
 	// send the frame to glfw window
@@ -70,4 +73,34 @@ func allDraws(window *glfw.Window) {
 
 	// save the frame
 	currentWindowFrame = theCtx.ggCtx.Image()
+}
+
+func displayCaret(window *glfw.Window) {
+	if caretDisplayCount != MaxCaretDisplayCount {
+		caretDisplayCount += 1
+		return
+	}
+	caretDisplayCount = 0
+
+	wWidth, wHeight := window.GetSize()
+
+	theCtx := Continue2dCtx(currentWindowFrame, &objCoords)
+	if caretDisplayed {
+		caretDisplayed = false
+
+		// send the frame to glfw window
+		g143.DrawImage(wWidth, wHeight, currentWindowFrame, theCtx.windowRect())
+		window.SwapBuffers()
+	} else {
+		theCtx.ggCtx.SetHexColor("#444")
+		caretDisplayed = true
+
+		theCtx.ggCtx.DrawRectangle(float64(caretX), float64(caretY)-5, 2, FontSize+10)
+		theCtx.ggCtx.Fill()
+
+		// send the frame to glfw window
+		g143.DrawImage(wWidth, wHeight, theCtx.ggCtx.Image(), theCtx.windowRect())
+		window.SwapBuffers()
+	}
+
 }
