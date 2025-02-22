@@ -19,14 +19,15 @@ func mCharCallback(window *glfw.Window, char rune) {
 	} else {
 		lastLine = tmpParts[len(tmpParts)-1]
 	}
-	if len(tmpParts[len(tmpParts)-1]) > 45 {
+	lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
+	if int(lastLineW) > wWidth-(2*Margin) {
 		enteredTxt = enteredTxt + "\n" + string(char)
 		caretY += FontSize + LineSpacing
-		caretX = 10
+		caretX = Margin
 	} else {
 		enteredTxt = tmp
 		charDisplayW, _ := theCtx.ggCtx.MeasureString(lastLine)
-		caretX = int(charDisplayW) + 10
+		caretX = int(charDisplayW) + Margin
 	}
 
 	sIRect := objCoords[MajorTextInput]
@@ -56,7 +57,7 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 			caretY -= FontSize + LineSpacing
 			enteredTxtParts := strings.Split(enteredTxt, "\n")
 			textDisplayW, _ := theCtx.ggCtx.MeasureString(enteredTxtParts[len(enteredTxtParts)-1])
-			caretX = int(textDisplayW) + 10
+			caretX = int(textDisplayW) + Margin
 		} else {
 
 			tmpParts := strings.Split(enteredTxt, "\n")
@@ -67,15 +68,15 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 				lastLine = tmpParts[len(tmpParts)-1]
 			}
 
-			charDisplayW, _ := theCtx.ggCtx.MeasureString(lastLine)
-			caretX = 10 + int(charDisplayW)
+			lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
+			caretX = Margin + int(lastLineW)
 		}
 	}
 
 	if key == glfw.KeyEnter {
 		enteredTxt = val + "\n"
 		caretY += FontSize + LineSpacing
-		caretX = 10
+		caretX = Margin
 	}
 
 	sIRect := objCoords[MajorTextInput]

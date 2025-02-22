@@ -65,7 +65,7 @@ func allDraws(window *glfw.Window) {
 	wWidth, wHeight := window.GetSize()
 
 	theCtx := New2dCtx(wWidth, wHeight, &objCoords)
-	theCtx.drawTextInput(MajorTextInput, 10, 10, wWidth-20, wHeight-70, "")
+	theCtx.drawTextInput(MajorTextInput, 10, 10, wWidth-20, wHeight-20, "")
 
 	// send the frame to glfw window
 	g143.DrawImage(wWidth, wHeight, theCtx.ggCtx.Image(), theCtx.windowRect())
