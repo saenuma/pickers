@@ -42,7 +42,7 @@ func main() {
 		window.SetPos(windowX, windowY)
 	}
 
-	// window.SetMouseButtonCallback(mouseBtnCallback)
+	window.SetMouseButtonCallback(mouseBtnCallback)
 	// window.SetCursorPosCallback(cursorCallback)
 	window.SetKeyCallback(mKeyCallback)
 	window.SetCharCallback(mCharCallback)
