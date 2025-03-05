@@ -11,18 +11,25 @@ const (
 	FontSize             = 30
 	LineSpacing          = 10
 	Margin               = 10
-	MaxCaretDisplayCount = FPS / 2
+	MaxCaretDisplayCount = FPS / 3
 
 	DoneBtn        = 101
 	MajorTextInput = 102
 )
 
 var (
-	objCoords          map[int]g143.Rect
-	currentWindowFrame image.Image
-	enteredTxt         string
-	caretX             = Margin
-	caretY             = Margin
-	caretDisplayed     bool
-	caretDisplayCount  int
+	objCoords             map[int]g143.Rect
+	currentWindowFrame    image.Image
+	enteredTxt            string
+	caretX                = Margin
+	caretY                = Margin
+	caretDisplayed        bool
+	caretDisplayCount     int
+	windowFrameWithErrors image.Image
+	frameUpdated          bool
 )
+
+type SpellCheckState struct {
+	Word   string
+	Passed bool
+}

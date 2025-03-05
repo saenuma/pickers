@@ -5,4 +5,4 @@ import (
 )
 
 //go:embed words.txt
-var DefaultFont []byte
+var AllWords []byte

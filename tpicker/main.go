@@ -50,11 +50,30 @@ func main() {
 		fmt.Println(enteredTxt)
 	})
 
+	go func() {
+		for {
+			time.Sleep(time.Second)
+			windowFrameWithErrors = getDisplayWithErrors(window)
+			frameUpdated = true
+		}
+	}()
+
 	for !window.ShouldClose() {
 		t := time.Now()
 		glfw.PollEvents()
 
 		displayCaret(window)
+
+		if frameUpdated {
+			wWidth, wHeight := window.GetSize()
+			theCtx := Continue2dCtx(currentWindowFrame, &objCoords)
+			// send the frame to glfw window
+			g143.DrawImage(wWidth, wHeight, windowFrameWithErrors, theCtx.windowRect())
+			window.SwapBuffers()
+
+			currentWindowFrame = windowFrameWithErrors
+			frameUpdated = false
+		}
 
 		time.Sleep(time.Second/time.Duration(FPS) - time.Since(t))
 	}
