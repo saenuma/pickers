@@ -1,38 +1,39 @@
 package main
 
 import (
+	"slices"
 	"strings"
 
 	g143 "github.com/bankole7782/graphics143"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
+func getCaretYAtLineNumber() int {
+	enteredTxtParts := strings.Split(enteredTxt, "\n")
+	for i := range len(enteredTxtParts) {
+		if caretY >= (i*(FontSize+Margin)) && caretY <= ((i+1)*(FontSize+Margin)) {
+			return i
+		}
+	}
+	return len(enteredTxtParts) - 1
+}
+
+func getCaretXAtSubText(theCtx Ctx, lineNo int) string {
+	enteredTxtParts := strings.Split(enteredTxt, "\n")
+	lineNoText := enteredTxtParts[lineNo]
+	for i := range len(lineNoText) {
+		partTxtW, _ := theCtx.ggCtx.MeasureString(lineNoText[:i])
+		if caretX == int(partTxtW)+Margin {
+			return lineNoText[:i]
+		}
+	}
+
+	return lineNoText
+}
+
 func mCharCallback(window *glfw.Window, char rune) {
 	wWidth, wHeight := window.GetSize()
 	theCtx := Continue2dCtx(currentWindowFrame, &objCoords)
-
-	getCaretYAtLineNumber := func() int {
-		enteredTxtParts := strings.Split(enteredTxt, "\n")
-		for i := range len(enteredTxtParts) {
-			if caretY >= (i*(FontSize+Margin)) && caretY <= ((i+1)*(FontSize+Margin)) {
-				return i
-			}
-		}
-		return len(enteredTxtParts) - 1
-	}
-
-	getCaretXAtSubText := func(theCtx Ctx, lineNo int) string {
-		enteredTxtParts := strings.Split(enteredTxt, "\n")
-		lineNoText := enteredTxtParts[lineNo]
-		for i := range len(lineNoText) {
-			partTxtW, _ := theCtx.ggCtx.MeasureString(lineNoText[:i])
-			if caretX == int(partTxtW)+Margin {
-				return lineNoText[:i]
-			}
-		}
-
-		return lineNoText
-	}
 
 	maxWidth := wWidth - (2 * Margin)
 
@@ -89,84 +90,6 @@ func mCharCallback(window *glfw.Window, char rune) {
 		}
 	}
 
-	// if caretYLineNo == len(enteredTxtParts)-1 {
-	// 	// we are on the last line
-	// 	caretXAtSubText := getCaretXAtSubText(theCtx, caretYLineNo)
-	// 	lastLine := enteredTxtParts[len(enteredTxtParts)-1]
-	// 	lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
-	// 	caretXAtSubTextW, _ := theCtx.ggCtx.MeasureString(caretXAtSubText)
-
-	// 	if lastLineW == caretXAtSubTextW {
-	// 		// enter char at end of text
-	// 		tmp := enteredTxt + string(char)
-	// 		tmpParts := strings.Split(tmp, "\n")
-	// 		var lastLine string
-	// 		if len(tmpParts) == 1 {
-	// 			lastLine = tmp
-	// 		} else {
-	// 			lastLine = tmpParts[len(tmpParts)-1]
-	// 		}
-	// 		lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
-	// 		if int(lastLineW) >  {
-	// 			enteredTxt = enteredTxt + "\n" + string(char)
-	// 			caretY += FontSize + LineSpacing
-	// 			caretX = Margin
-	// 		} else {
-	// 			enteredTxt = tmp
-	// 			charDisplayW, _ := theCtx.ggCtx.MeasureString(enteredTxt)
-	// 			caretX = int(charDisplayW) + Margin
-	// 		}
-
-	// 	} else {
-	// 		// enter char at subtext
-	// 		subTextLen := len(caretXAtSubText)
-	// 		tmp := lastLine[:subTextLen] + string(char) + lastLine[subTextLen:]
-	// 		tmpW, _ := theCtx.ggCtx.MeasureString(tmp)
-	// 		if int(tmpW) > wWidth-(2*Margin) {
-	// 			tmpText := lastLine[:subTextLen]
-	// 			tmpTextW, _ := theCtx.ggCtx.MeasureString(tmpText)
-	// 			if int(tmpTextW) > wWidth-(2*Margin) {
-	// 				enteredTxtParts[len(enteredTxtParts)-1] = tmpText + "\n" + string(char) + lastLine[subTextLen:]
-	// 				enteredTxt = strings.Join(enteredTxtParts, "\n")
-	// 				caretY += FontSize + LineSpacing
-	// 				caretX = Margin
-	// 			} else {
-	// 				enteredTxtParts[len(enteredTxtParts)-1] = tmpText + string(char) + "\n" + lastLine[subTextLen:]
-	// 				enteredTxt = strings.Join(enteredTxtParts, "\n")
-	// 				caretX = Margin + int(tmpTextW)
-	// 			}
-	// 		} else {
-	// 			enteredTxtParts[len(enteredTxtParts)-1] = tmp
-	// 			enteredTxt = strings.Join(enteredTxtParts, "\n")
-	// 			charDisplayW, _ := theCtx.ggCtx.MeasureString(lastLine[:subTextLen] + string(char))
-	// 			caretX = int(charDisplayW) + Margin
-	// 		}
-	// 	}
-
-	// } else {
-
-	// 	caretXAtSubText := getCaretXAtSubText(theCtx, caretYLineNo)
-	// 	caretXAtSubTextLen := len(caretXAtSubText)
-	// 	caretYSubText := enteredTxtParts[caretYLineNo]
-	// 	// caretXSubTextW, _ := theCtx.ggCtx.MeasureString(caretXAtSubText)
-
-	// 	tmp := caretYSubText[:caretXAtSubTextLen] + string(char) + caretYSubText[caretXAtSubTextLen:]
-	// 	tmpW, _ := theCtx.ggCtx.MeasureString(tmp)
-	// 	if int(tmpW) > wWidth-(2*Margin) {
-	// 		subTextThen := caretYSubText + "\n" + string(char)
-	// 		enteredTxtParts[caretYLineNo] = subTextThen
-	// 		enteredTxt = strings.Join(enteredTxtParts, "\n")
-	// 		caretY += FontSize + LineSpacing
-	// 		caretX = Margin
-	// 	} else {
-	// 		enteredTxtParts[caretYLineNo] = tmp
-	// 		enteredTxt = strings.Join(enteredTxtParts, "\n")
-	// 		charDisplayW, _ := theCtx.ggCtx.MeasureString(caretYSubText[:caretXAtSubTextLen] + string(char))
-	// 		caretX = int(charDisplayW) + Margin
-	// 	}
-
-	// }
-
 	sIRect := objCoords[MajorTextInput]
 	theCtx.drawTextInput(MajorTextInput, sIRect.OriginX, sIRect.OriginY, sIRect.Width, sIRect.Height, enteredTxt)
 
@@ -186,34 +109,88 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 	wWidth, wHeight := window.GetSize()
 	theCtx := Continue2dCtx(currentWindowFrame, &objCoords)
 
-	val := enteredTxt
-	if key == glfw.KeyBackspace && len(enteredTxt) != 0 {
-		enteredTxt = val[:len(val)-1]
-		lastChar := string(val[len(val)-1])
-		if lastChar == "\n" {
-			caretY -= FontSize + LineSpacing
-			enteredTxtParts := strings.Split(enteredTxt, "\n")
-			textDisplayW, _ := theCtx.ggCtx.MeasureString(enteredTxtParts[len(enteredTxtParts)-1])
-			caretX = int(textDisplayW) + Margin
-		} else {
+	maxWidth := wWidth - (2 * Margin)
 
-			tmpParts := strings.Split(enteredTxt, "\n")
-			var lastLine string
-			if len(tmpParts) == 1 {
-				lastLine = enteredTxt
+	enteredTxtParts := strings.Split(enteredTxt, "\n")
+	caretYLineNo := getCaretYAtLineNumber()
+	currentLine := enteredTxtParts[caretYLineNo]
+	currentLineW, _ := theCtx.ggCtx.MeasureString(currentLine)
+	caretXAtSubText := getCaretXAtSubText(theCtx, caretYLineNo)
+	caretXAtSubTextW, _ := theCtx.ggCtx.MeasureString(caretXAtSubText)
+
+	if caretYLineNo == len(enteredTxtParts)-1 && int(caretXAtSubTextW) == int(currentLineW) {
+		val := enteredTxt
+		if key == glfw.KeyBackspace && len(enteredTxt) != 0 {
+			enteredTxt = val[:len(val)-1]
+			lastChar := string(val[len(val)-1])
+			if lastChar == "\n" {
+				caretY -= FontSize + LineSpacing
+				enteredTxtParts := strings.Split(enteredTxt, "\n")
+				textDisplayW, _ := theCtx.ggCtx.MeasureString(enteredTxtParts[len(enteredTxtParts)-1])
+				caretX = int(textDisplayW) + Margin
 			} else {
-				lastLine = tmpParts[len(tmpParts)-1]
+
+				tmpParts := strings.Split(enteredTxt, "\n")
+				var lastLine string
+				if len(tmpParts) == 1 {
+					lastLine = enteredTxt
+				} else {
+					lastLine = tmpParts[len(tmpParts)-1]
+				}
+
+				lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
+				caretX = Margin + int(lastLineW)
 			}
-
-			lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
-			caretX = Margin + int(lastLineW)
 		}
-	}
 
-	if key == glfw.KeyEnter {
-		enteredTxt = val + "\n"
-		caretY += FontSize + LineSpacing
-		caretX = Margin
+		if key == glfw.KeyEnter {
+			enteredTxt = val + "\n"
+			caretY += FontSize + LineSpacing
+			caretX = Margin
+		}
+
+	} else {
+		subTextLen := len(caretXAtSubText)
+
+		if key == glfw.KeyBackspace {
+			if caretX == Margin && caretY == Margin {
+				return
+			}
+			if len(caretXAtSubText) == 0 {
+				lastLine := enteredTxtParts[caretYLineNo-1]
+				editedLastLine := lastLine + currentLine
+				editedLastLineW, _ := theCtx.ggCtx.MeasureString(editedLastLine)
+				if int(editedLastLineW) > maxWidth {
+					tmpLastLine := lastLine[:len(lastLine)-1]
+					enteredTxtParts[caretYLineNo-1] = tmpLastLine
+					enteredTxt = strings.Join(enteredTxtParts, "\n")
+					caretX = maxWidth
+				} else {
+					enteredTxtParts[caretYLineNo-1] = editedLastLine
+					enteredTxtParts = slices.Delete(enteredTxtParts, caretYLineNo, caretYLineNo+1)
+					enteredTxt = strings.Join(enteredTxtParts, "\n")
+					lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
+					caretX = Margin + int(lastLineW)
+				}
+
+				caretY -= FontSize + LineSpacing
+
+			} else {
+				editedSubText := caretXAtSubText[:len(caretXAtSubText)-1] + currentLine[subTextLen:]
+				enteredTxtParts[caretYLineNo] = editedSubText
+				enteredTxt = strings.Join(enteredTxtParts, "\n")
+				subTextW, _ := theCtx.ggCtx.MeasureString(caretXAtSubText[:len(caretXAtSubText)-1])
+				caretX = Margin + int(subTextW)
+			}
+		}
+
+		if key == glfw.KeyEnter {
+			enteredTxtParts[caretYLineNo] = caretXAtSubText
+			enteredTxtParts = slices.Insert(enteredTxtParts, caretYLineNo+1, currentLine[subTextLen:])
+			enteredTxt = strings.Join(enteredTxtParts, "\n")
+			caretY += FontSize + LineSpacing
+			caretX = Margin
+		}
 	}
 
 	sIRect := objCoords[MajorTextInput]
