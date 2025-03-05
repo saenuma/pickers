@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	g143 "github.com/bankole7782/graphics143"
@@ -30,6 +31,18 @@ func main() {
 		}
 
 		windowX, windowY = xCoord, yCoord
+	}
+
+	// prepare words.txt for search
+	words := strings.Split(string(AllWords), "\n")
+	wordsByFirstCharMap = make(map[string][]string)
+	for _, word := range words {
+		arr, ok := wordsByFirstCharMap[string(word[0])]
+		if ok {
+			wordsByFirstCharMap[string(word[0])] = append(arr, word)
+		} else {
+			wordsByFirstCharMap[string(word[0])] = []string{word}
+		}
 	}
 
 	runtime.LockOSThread()

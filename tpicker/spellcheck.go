@@ -11,25 +11,18 @@ import (
 
 func isWordInDict(toFindWord string) bool {
 	if toFindWord == "a" || toFindWord == "I" || toFindWord == "A" {
-		return false
+		return true
 	}
 
 	toFindWord = strings.ToLower(toFindWord)
 	if strings.HasSuffix(toFindWord, ".") || strings.HasSuffix(toFindWord, ",") {
 		toFindWord = toFindWord[:len(toFindWord)-1]
 	}
-	words := strings.Split(string(AllWords), "\n")
-	wordsByFirstCharMap := make(map[string][]string)
-	for _, word := range words {
-		arr, ok := wordsByFirstCharMap[string(word[0])]
-		if ok {
-			wordsByFirstCharMap[string(word[0])] = append(arr, word)
-		} else {
-			wordsByFirstCharMap[string(word[0])] = []string{word}
-		}
-	}
 
-	smallList := wordsByFirstCharMap[string(toFindWord[0])]
+	smallList, ok := wordsByFirstCharMap[string(toFindWord[0])]
+	if !ok {
+		return false
+	}
 	return slices.Contains(smallList, toFindWord)
 }
 

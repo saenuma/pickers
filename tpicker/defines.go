@@ -27,6 +27,7 @@ var (
 	caretDisplayCount     int
 	windowFrameWithErrors image.Image
 	frameUpdated          bool
+	wordsByFirstCharMap   map[string][]string
 )
 
 type SpellCheckState struct {
