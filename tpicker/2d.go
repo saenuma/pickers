@@ -98,8 +98,12 @@ func (ctx *Ctx) drawTextInputWithErrors(inputId, originX, originY, inputWidth, h
 		}
 
 		currentY = originY
+		ctx.ggCtx.SetHexColor("#A74747")
+		ctx.ggCtx.SetDash(FontSize/5, FontSize/5)
+		ctx.ggCtx.SetLineWidth(3)
+
 		for _, str := range strs {
-			ctx.ggCtx.SetHexColor("#A74747")
+
 			strParts := strings.Fields(str)
 			spellcheckResults := findWordsNotInDict(str)
 			for i, aResult := range spellcheckResults {
@@ -110,8 +114,11 @@ func (ctx *Ctx) drawTextInputWithErrors(inputId, originX, originY, inputWidth, h
 					}
 					tmpStrW, _ := ctx.ggCtx.MeasureString(tmpStr)
 					wordW, _ := ctx.ggCtx.MeasureString(aResult.Word)
-					ctx.ggCtx.DrawRectangle(float64(originX+int(tmpStrW)), float64(currentY+FontSize+2), wordW, 3)
-					ctx.ggCtx.Fill()
+					x1 := originX + int(tmpStrW)
+					y1 := currentY + FontSize + 5
+					x2 := x1 + int(wordW)
+					ctx.ggCtx.DrawLine(float64(x1), float64(y1), float64(x2), float64(y1))
+					ctx.ggCtx.Stroke()
 				}
 			}
 			currentY += FontSize + LineSpacing
