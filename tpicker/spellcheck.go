@@ -6,8 +6,6 @@ import (
 	"strings"
 	"sync"
 	"unicode"
-
-	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
 func IsUpper(s string) bool {
@@ -74,7 +72,7 @@ func findWordsNotInDict(inText string) []SpellCheckState {
 	return ret
 }
 
-func getDisplayWithErrors(window *glfw.Window) image.Image {
+func getDisplayWithErrors() image.Image {
 	// wWidth, wHeight := window.GetSize()
 	theCtx := Continue2dCtx(currentWindowFrame, &objCoords)
 

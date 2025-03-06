@@ -66,7 +66,7 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(time.Second)
-			windowFrameWithErrors = getDisplayWithErrors(window)
+			windowFrameWithErrors = getDisplayWithErrors()
 			frameUpdated = true
 		}
 	}()
