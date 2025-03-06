@@ -60,12 +60,27 @@ func findWordsNotInDict(inText string) []SpellCheckState {
 	ret := make([]SpellCheckState, len(inTextWords))
 	for i, word := range inTextWords {
 		wg.Add(1)
-		go func(word string, i int) {
+		go func(word string, i int, Words []string) {
 			defer wg.Done()
 
 			retBool := isWordInDict(word)
-			ret[i] = SpellCheckState{word, retBool}
-		}(word, i)
+			if retBool {
+				sentenceBegin := false
+				if i == 0 {
+					sentenceBegin = true
+				}
+				if i > 0 {
+					if strings.HasSuffix(Words[i-1], ".") {
+						sentenceBegin = true
+					}
+				}
+				if sentenceBegin && IsLower(string(word[0])) {
+					ret[i] = SpellCheckState{word, false, true}
+				}
+			} else {
+				ret[i] = SpellCheckState{word, retBool, false}
+			}
+		}(word, i, inTextWords)
 	}
 	wg.Wait()
 

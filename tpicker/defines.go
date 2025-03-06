@@ -33,4 +33,5 @@ var (
 type SpellCheckState struct {
 	Word   string
 	Passed bool
+	Minor  bool
 }

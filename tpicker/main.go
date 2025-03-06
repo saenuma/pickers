@@ -49,7 +49,7 @@ func main() {
 
 	objCoords = make(map[int]g143.Rect)
 
-	window := g143.NewWindow(900, 500, "sae.ng text picker", false)
+	window := g143.NewWindow(900, 300, "sae.ng text picker", false)
 	allDraws(window)
 	if changeLoc {
 		window.SetPos(windowX, windowY)
