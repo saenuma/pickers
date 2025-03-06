@@ -28,6 +28,10 @@ func IsLower(s string) bool {
 	return true
 }
 
+func clearQuotes(str string) string {
+	return strings.ReplaceAll(str, "'", "")
+}
+
 func isWordInDict(toFindWord string) bool {
 	if toFindWord == "a" || toFindWord == "I" || toFindWord == "A" {
 		return true
@@ -39,7 +43,7 @@ func isWordInDict(toFindWord string) bool {
 	if IsUpper(string(toFindWord[0])) {
 		return true
 	}
-	toFindWord = strings.ToLower(toFindWord)
+	toFindWord = clearQuotes(toFindWord)
 	if strings.HasSuffix(toFindWord, ".") || strings.HasSuffix(toFindWord, ",") {
 		toFindWord = toFindWord[:len(toFindWord)-1]
 	}
