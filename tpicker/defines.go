@@ -28,6 +28,7 @@ var (
 	windowFrameWithErrors image.Image
 	frameUpdated          bool
 	wordsByFirstCharMap   map[string][]string
+	spellcheckTrie        *Trie
 )
 
 type SpellCheckState struct {

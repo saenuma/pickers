@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
@@ -20,9 +21,8 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 
 	getLineClicked := func() int {
 		txtParts := strings.Split(enteredTxt, "\n")
-		currentY := Margin
 		for i := range len(txtParts) {
-			if yPosInt >= (currentY+(i*FontSize)) && yPosInt <= (currentY+((i+1)*FontSize)) {
+			if yPosInt > Margin+(i*(FontSize+LineSpacing)) && yPosInt < Margin+((i+1)*(FontSize+LineSpacing)) {
 				return i
 			}
 		}
@@ -41,6 +41,64 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 			}
 		}
 		return lineClicked
+	}
+
+	getWordRightClicked := func(theCtx Ctx, lineNo, xPosInt int) string {
+		txtParts := strings.Split(enteredTxt, "\n")
+		if lineNo >= len(txtParts) {
+			return ""
+		}
+
+		lineClicked := txtParts[lineNo]
+
+		clickedWordIndex := 0
+		for i := range len(lineClicked) {
+			subLineW, _ := theCtx.ggCtx.MeasureString(lineClicked[:i])
+			subLineW2, _ := theCtx.ggCtx.MeasureString(lineClicked[:i+1])
+			if xPosInt > int(subLineW) && xPosInt < int(subLineW2) {
+				clickedWordIndex = i
+			}
+		}
+
+		lineClickedW, _ := theCtx.ggCtx.MeasureString(lineClicked)
+		if clickedWordIndex == 0 && xPosInt > int(lineClickedW) {
+			return ""
+		}
+
+		prevChars := make([]string, 0)
+		prevCharIndex := clickedWordIndex
+		for {
+			currentChar := string(lineClicked[prevCharIndex])
+			prevChars = append(prevChars, currentChar)
+			if currentChar == " " {
+				break
+			}
+
+			prevCharIndex -= 1
+			if prevCharIndex < 0 {
+				break
+			}
+		}
+		slices.Reverse(prevChars)
+
+		nextChars := make([]string, 0)
+		nextCharIndex := clickedWordIndex
+
+		for {
+			currentChar := string(lineClicked[nextCharIndex])
+			nextChars = append(nextChars, currentChar)
+			if currentChar == " " {
+				break
+			}
+
+			nextCharIndex += 1
+			if nextCharIndex >= len(lineClicked) {
+				break
+			}
+		}
+
+		foundChars := slices.Concat(prevChars, nextChars[1:])
+		return strings.TrimSpace(strings.Join(foundChars, ""))
 	}
 
 	// wWidth, wHeight := window.GetSize()
@@ -72,8 +130,14 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 			}
 			caretY = Margin + (lineClicked * (FontSize + Margin))
 		}
+
 	} else if button == glfw.MouseButtonRight {
-		fmt.Println("Right click")
+		lineClicked := getLineClicked()
+		rightClickedWord := getWordRightClicked(theCtx, lineClicked, xPosInt)
+		ok, suggestions := spellcheckTrie.Search(rightClickedWord)
+		if !ok {
+			fmt.Println(suggestions)
+		}
 	}
 
 }

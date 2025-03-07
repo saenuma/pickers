@@ -45,6 +45,7 @@ func main() {
 		}
 	}
 
+	spellcheckTrie = NewSpellcheckTrie()
 	runtime.LockOSThread()
 
 	objCoords = make(map[int]g143.Rect)
