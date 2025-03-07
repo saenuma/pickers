@@ -134,10 +134,8 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 	} else if button == glfw.MouseButtonRight {
 		lineClicked := getLineClicked()
 		rightClickedWord := getWordRightClicked(theCtx, lineClicked, xPosInt)
-		ok, suggestions := spellcheckTrie.Search(rightClickedWord)
-		if !ok {
-			fmt.Println(suggestions)
-		}
+		suggestions := spellcheckModel.Suggest(rightClickedWord, 20)
+		fmt.Println(suggestions)
 	}
 
 }

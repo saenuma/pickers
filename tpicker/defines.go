@@ -4,6 +4,7 @@ import (
 	"image"
 
 	g143 "github.com/bankole7782/graphics143"
+	"github.com/essentialkaos/ek/v13/spellcheck"
 )
 
 const (
@@ -28,7 +29,7 @@ var (
 	windowFrameWithErrors image.Image
 	frameUpdated          bool
 	wordsByFirstCharMap   map[string][]string
-	spellcheckTrie        *Trie
+	spellcheckModel       *spellcheck.Model
 )
 
 type SpellCheckState struct {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	g143 "github.com/bankole7782/graphics143"
+	"github.com/essentialkaos/ek/v13/spellcheck"
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/gookit/color"
 )
@@ -45,7 +46,8 @@ func main() {
 		}
 	}
 
-	spellcheckTrie = NewSpellcheckTrie()
+	// spellcheckTrie = NewSpellcheckTrie()
+	spellcheckModel = spellcheck.Train(words)
 	runtime.LockOSThread()
 
 	objCoords = make(map[int]g143.Rect)
