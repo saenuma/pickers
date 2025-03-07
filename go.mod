@@ -9,7 +9,6 @@ require (
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a
 	github.com/gookit/color v1.5.4
 	github.com/lucasb-eyer/go-colorful v1.2.0
-	github.com/makifdb/spellcheck v0.0.0-20230320010500-5584e1a8fe24
 )
 
 require (
