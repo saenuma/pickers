@@ -32,11 +32,25 @@ func getCaretXAtSubText(theCtx Ctx, lineNo int) string {
 }
 
 func mCharCallback(window *glfw.Window, char rune) {
+	capitalizeSentences := func(text string) string {
+		textParts := strings.Split(text, ". ")
+		for i, part := range textParts {
+			if len(part) <= 1 {
+				continue
+			}
+			textParts[i] = strings.ToUpper(string(part[0])) + part[1:]
+		}
+		return strings.Join(textParts, ". ")
+	}
+
 	wWidth, wHeight := window.GetSize()
 	theCtx := Continue2dCtx(currentWindowFrame, &objCoords)
 
 	maxWidth := wWidth - (2 * Margin)
 
+	if len(enteredTxt) > 0 {
+		enteredTxt = capitalizeSentences(enteredTxt)
+	}
 	enteredTxtParts := strings.Split(enteredTxt, "\n")
 	caretYLineNo := getCaretYAtLineNumber()
 	currentLine := enteredTxtParts[caretYLineNo]

@@ -116,6 +116,7 @@ func (ctx *Ctx) drawTextInputWithErrors(inputId, originX, originY, inputWidth, h
 		}
 
 		currentY = originY
+		ctx.ggCtx.SetHexColor("#A74747")
 		ctx.ggCtx.SetDash(FontSize/5, FontSize/5)
 		ctx.ggCtx.SetLineWidth(3)
 
@@ -133,11 +134,6 @@ func (ctx *Ctx) drawTextInputWithErrors(inputId, originX, originY, inputWidth, h
 					x1 := originX + int(tmpStrW)
 					y1 := currentY + FontSize + 5
 					x2 := x1 + int(wordW)
-					if aResult.Minor {
-						ctx.ggCtx.SetHexColor("#5F8F9A")
-					} else {
-						ctx.ggCtx.SetHexColor("#A74747")
-					}
 					ctx.ggCtx.DrawLine(float64(x1), float64(y1), float64(x2), float64(y1))
 					ctx.ggCtx.Stroke()
 				}
