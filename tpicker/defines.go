@@ -9,7 +9,7 @@ import (
 
 const (
 	FPS                  = 24
-	FontSize             = 30
+	FontSize             = 25
 	LineSpacing          = 10
 	Margin               = 10
 	MaxCaretDisplayCount = FPS / 3
