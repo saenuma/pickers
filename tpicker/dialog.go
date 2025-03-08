@@ -15,8 +15,8 @@ func drawDialog(window *glfw.Window, suggestions []string) {
 	theCtx := Continue2dCtx(img, &scObjCoords)
 
 	// dialog rectangle
-	dialogWidth := wWidth - 100
-	dialogHeight := wHeight - 100
+	dialogWidth := wWidth - 50
+	dialogHeight := wHeight - 50
 
 	dialogOriginX := (wWidth - dialogWidth) / 2
 	dialogOriginY := (wHeight - dialogHeight) / 2
@@ -26,8 +26,11 @@ func drawDialog(window *glfw.Window, suggestions []string) {
 		float64(dialogHeight), 10)
 	theCtx.ggCtx.Fill()
 
+	closeBtnX := dialogOriginX + dialogWidth - 100
+	theCtx.drawButtonA(SWD_CloseBtn, closeBtnX, dialogOriginY+10, "Close", "#fff", "#B75F5F")
+
 	currentX := dialogOriginX + 20
-	currentY := dialogOriginY + 20
+	currentY := dialogOriginY + 50
 
 	for i, suggestedWord := range suggestions {
 		btnId := 1000 + (i + 1)
@@ -36,9 +39,9 @@ func drawDialog(window *glfw.Window, suggestions []string) {
 		newX := currentX + sWRect.Width + 10
 		maxWidth := dialogOriginX + dialogWidth
 		if newX > (maxWidth - sWRect.Width) {
-			currentY += 50
+			currentY += 10 + FontSize
 
-			if currentY > dialogOriginY {
+			if (currentY + FontSize) > (dialogOriginY + dialogHeight) {
 				break
 			}
 

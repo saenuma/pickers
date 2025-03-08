@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 
@@ -135,7 +134,10 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 	} else if button == glfw.MouseButtonRight {
 		lineClicked := getLineClicked()
 		rightClickedWord := getWordRightClicked(theCtx, lineClicked, xPosInt)
-		suggestions := spellcheckModel.Suggest(rightClickedWord, 20)
+		suggestions := spellcheckModel.Suggest(rightClickedWord, 30)
+
+		currentLineClicked = lineClicked
+		currentRightClickedWord = rightClickedWord
 		currentSuggestions = suggestions
 
 		// bring up suggestions
@@ -174,12 +176,8 @@ func sWMouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glf
 		return
 	}
 
-	if widgetCode > 1000 && widgetCode < 2000 {
-		num := widgetCode - 1000 - 1
-		suggestedWord := currentSuggestions[num]
-		fmt.Println(suggestedWord)
-
-		// move to work view
+	if widgetCode == SWD_CloseBtn {
+		// move to text view without applying any suggestion
 		drawTextView(window)
 		window.SetMouseButtonCallback(mouseBtnCallback)
 		// window.SetCursorPosCallback(cursorCallback)
@@ -188,6 +186,30 @@ func sWMouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glf
 		window.SetCursorPosCallback(nil)
 
 		suggestionsDialogShown = false
+	}
 
+	if widgetCode > 1000 && widgetCode < 2000 {
+		num := widgetCode - 1000 - 1
+		suggestedWord := currentSuggestions[num]
+		enteredTxtParts := strings.Split(enteredTxt, "\n")
+		lineClickedStr := enteredTxtParts[currentLineClicked]
+
+		incorrectWordBegin := strings.Index(lineClickedStr, currentRightClickedWord)
+		incorrectWordEnd := incorrectWordBegin + len(currentRightClickedWord)
+		if incorrectWordBegin != -1 {
+			editedLineStr := lineClickedStr[:incorrectWordBegin] + suggestedWord + lineClickedStr[incorrectWordEnd:]
+			enteredTxtParts[currentLineClicked] = editedLineStr
+			enteredTxt = strings.Join(enteredTxtParts, "\n")
+		}
+
+		// move to text view
+		drawTextView(window)
+		window.SetMouseButtonCallback(mouseBtnCallback)
+		// window.SetCursorPosCallback(cursorCallback)
+		window.SetKeyCallback(mKeyCallback)
+		window.SetCharCallback(mCharCallback)
+		window.SetCursorPosCallback(nil)
+
+		suggestionsDialogShown = false
 	}
 }

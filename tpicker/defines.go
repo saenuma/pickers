@@ -15,6 +15,8 @@ const (
 	MaxCaretDisplayCount = FPS / 3
 
 	MajorTextInput = 102
+
+	SWD_CloseBtn = 201
 )
 
 var (
@@ -31,10 +33,13 @@ var (
 	caretDisplayCount int
 	frameUpdated      bool
 
-	wordsByFirstCharMap    map[string][]string
-	spellcheckModel        *spellcheck.Model
-	currentSuggestions     []string
-	suggestionsDialogShown bool
+	wordsByFirstCharMap map[string][]string
+	spellcheckModel     *spellcheck.Model
+
+	currentSuggestions      []string
+	suggestionsDialogShown  bool
+	currentLineClicked      int
+	currentRightClickedWord string
 )
 
 type SpellCheckState struct {
