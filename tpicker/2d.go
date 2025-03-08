@@ -52,6 +52,24 @@ func Continue2dCtx(img image.Image, objCoords *map[int]g143.Rect) Ctx {
 	return ctx
 }
 
+func (ctx *Ctx) drawButtonA(btnId, originX, originY int, text, textColor, bgColor string) g143.Rect {
+	// draw bounding rect
+	textW, textH := ctx.ggCtx.MeasureString(text)
+	width, height := textW+20, textH+15
+	ctx.ggCtx.SetHexColor(bgColor)
+	ctx.ggCtx.DrawRectangle(float64(originX), float64(originY), float64(width), float64(height))
+	ctx.ggCtx.Fill()
+
+	// draw text
+	ctx.ggCtx.SetHexColor(textColor)
+	ctx.ggCtx.DrawString(text, float64(originX)+10, float64(originY)+FontSize)
+
+	// save dimensions
+	btnARect := g143.NewRect(originX, originY, int(width), int(height))
+	(*ctx.ObjCoords)[btnId] = btnARect
+	return btnARect
+}
+
 func (ctx *Ctx) drawTextInput(inputId, originX, originY, inputWidth, height int, values string) g143.Rect {
 	ctx.ggCtx.SetHexColor("#ddd")
 	ctx.ggCtx.DrawRoundedRectangle(float64(originX), float64(originY)+float64(height), float64(inputWidth), 2, 2)
@@ -102,7 +120,6 @@ func (ctx *Ctx) drawTextInputWithErrors(inputId, originX, originY, inputWidth, h
 		ctx.ggCtx.SetLineWidth(3)
 
 		for _, str := range strs {
-
 			strParts := strings.Fields(str)
 			spellcheckResults := findWordsNotInDict(str)
 			for i, aResult := range spellcheckResults {

@@ -14,22 +14,27 @@ const (
 	Margin               = 10
 	MaxCaretDisplayCount = FPS / 3
 
-	DoneBtn        = 101
 	MajorTextInput = 102
 )
 
 var (
-	objCoords             map[int]g143.Rect
+	objCoords   map[int]g143.Rect
+	scObjCoords map[int]g143.Rect
+
 	currentWindowFrame    image.Image
-	enteredTxt            string
-	caretX                = Margin
-	caretY                = Margin
-	caretDisplayed        bool
-	caretDisplayCount     int
 	windowFrameWithErrors image.Image
-	frameUpdated          bool
-	wordsByFirstCharMap   map[string][]string
-	spellcheckModel       *spellcheck.Model
+
+	enteredTxt        string
+	caretX            = Margin
+	caretY            = Margin
+	caretDisplayed    bool
+	caretDisplayCount int
+	frameUpdated      bool
+
+	wordsByFirstCharMap    map[string][]string
+	spellcheckModel        *spellcheck.Model
+	currentSuggestions     []string
+	suggestionsDialogShown bool
 )
 
 type SpellCheckState struct {

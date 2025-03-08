@@ -46,14 +46,13 @@ func main() {
 		}
 	}
 
-	// spellcheckTrie = NewSpellcheckTrie()
 	spellcheckModel = spellcheck.Train(words)
 	runtime.LockOSThread()
 
 	objCoords = make(map[int]g143.Rect)
 
 	window := g143.NewWindow(900, 300, "sae.ng text picker", false)
-	allDraws(window)
+	drawTextView(window)
 	if changeLoc {
 		window.SetPos(windowX, windowY)
 	}
@@ -68,6 +67,10 @@ func main() {
 
 	go func() {
 		for {
+			if suggestionsDialogShown {
+				continue
+			}
+
 			time.Sleep(time.Second)
 			windowFrameWithErrors = getDisplayWithErrors()
 			frameUpdated = true
@@ -80,27 +83,29 @@ func main() {
 
 		displayCaret(window)
 
-		if frameUpdated {
-			wWidth, wHeight := window.GetSize()
-			theCtx := Continue2dCtx(currentWindowFrame, &objCoords)
-			// send the frame to glfw window
-			g143.DrawImage(wWidth, wHeight, windowFrameWithErrors, theCtx.windowRect())
-			window.SwapBuffers()
+		if !suggestionsDialogShown {
+			if frameUpdated {
+				wWidth, wHeight := window.GetSize()
+				theCtx := Continue2dCtx(currentWindowFrame, &objCoords)
+				// send the frame to glfw window
+				g143.DrawImage(wWidth, wHeight, windowFrameWithErrors, theCtx.windowRect())
+				window.SwapBuffers()
 
-			currentWindowFrame = windowFrameWithErrors
-			frameUpdated = false
+				currentWindowFrame = windowFrameWithErrors
+				frameUpdated = false
+			}
 		}
 
 		time.Sleep(time.Second/time.Duration(FPS) - time.Since(t))
 	}
 }
 
-func allDraws(window *glfw.Window) {
+func drawTextView(window *glfw.Window) {
 	objCoords = make(map[int]g143.Rect)
 	wWidth, wHeight := window.GetSize()
 
 	theCtx := New2dCtx(wWidth, wHeight, &objCoords)
-	theCtx.drawTextInput(MajorTextInput, 10, 10, wWidth-20, wHeight-20, "")
+	theCtx.drawTextInput(MajorTextInput, 10, 10, wWidth-20, wHeight-20, enteredTxt)
 
 	// send the frame to glfw window
 	g143.DrawImage(wWidth, wHeight, theCtx.ggCtx.Image(), theCtx.windowRect())
@@ -111,6 +116,9 @@ func allDraws(window *glfw.Window) {
 }
 
 func displayCaret(window *glfw.Window) {
+	if suggestionsDialogShown {
+		return
+	}
 	if caretDisplayCount != MaxCaretDisplayCount {
 		caretDisplayCount += 1
 		return

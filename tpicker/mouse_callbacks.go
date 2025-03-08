@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	g143 "github.com/bankole7782/graphics143"
 	"github.com/go-gl/glfw/v3.3/glfw"
 )
 
@@ -135,7 +136,58 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		lineClicked := getLineClicked()
 		rightClickedWord := getWordRightClicked(theCtx, lineClicked, xPosInt)
 		suggestions := spellcheckModel.Suggest(rightClickedWord, 20)
-		fmt.Println(suggestions)
+		currentSuggestions = suggestions
+
+		// bring up suggestions
+		suggestionsDialogShown = true
+		drawDialog(window, suggestions)
+		window.SetMouseButtonCallback(sWMouseBtnCallback)
+		// window.SetCursorPosCallback(cursorCallback)
+		window.SetKeyCallback(nil)
+		window.SetCharCallback(nil)
+
 	}
 
+}
+
+func sWMouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+	if action != glfw.Release {
+		return
+	}
+
+	xPos, yPos := window.GetCursorPos()
+	xPosInt := int(xPos)
+	yPosInt := int(yPos)
+
+	// var widgetRS g143.Rect
+	var widgetCode int
+
+	for code, RS := range scObjCoords {
+		if g143.InRect(RS, xPosInt, yPosInt) {
+			// widgetRS = RS
+			widgetCode = code
+			break
+		}
+	}
+
+	if widgetCode == 0 {
+		return
+	}
+
+	if widgetCode > 1000 && widgetCode < 2000 {
+		num := widgetCode - 1000 - 1
+		suggestedWord := currentSuggestions[num]
+		fmt.Println(suggestedWord)
+
+		// move to work view
+		drawTextView(window)
+		window.SetMouseButtonCallback(mouseBtnCallback)
+		// window.SetCursorPosCallback(cursorCallback)
+		window.SetKeyCallback(mKeyCallback)
+		window.SetCharCallback(mCharCallback)
+		window.SetCursorPosCallback(nil)
+
+		suggestionsDialogShown = false
+
+	}
 }
