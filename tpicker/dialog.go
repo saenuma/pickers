@@ -26,27 +26,33 @@ func drawDialog(window *glfw.Window, suggestions []string) {
 		float64(dialogHeight), 10)
 	theCtx.ggCtx.Fill()
 
-	closeBtnX := dialogOriginX + dialogWidth - 100
-	theCtx.drawButtonA(SWD_CloseBtn, closeBtnX, dialogOriginY+10, "Close", "#fff", "#B75F5F")
+	closeBtnX := dialogOriginX + dialogWidth - 40
+	theCtx.drawButtonA(SWD_CloseBtn, closeBtnX, dialogOriginY+10, "x", "#fff", "#B75F5F")
 
-	currentX := dialogOriginX + 20
-	currentY := dialogOriginY + 50
+	currentX := dialogOriginX + 10
+	currentY := dialogOriginY + 10
 
 	for i, suggestedWord := range suggestions {
 		btnId := 1000 + (i + 1)
-		sWRect := theCtx.drawButtonA(btnId, currentX, currentY, suggestedWord, "#444", "#fff")
 
-		newX := currentX + sWRect.Width + 10
+		textW, _ := theCtx.ggCtx.MeasureString(suggestedWord)
+		textW = textW + 20
+		newX := currentX + int(textW) + 10
 		maxWidth := dialogOriginX + dialogWidth
-		if newX > (maxWidth - sWRect.Width) {
+		if currentY == dialogOriginY+10 {
+			maxWidth = maxWidth - 30
+		}
+		if newX > maxWidth {
 			currentY += 10 + FontSize
 
 			if (currentY + FontSize) > (dialogOriginY + dialogHeight) {
 				break
 			}
 
-			currentX = 40
+			currentX = dialogOriginX + 10
 		} else {
+			sWRect := theCtx.drawButtonA(btnId, currentX, currentY, suggestedWord, "#444", "#fff")
+
 			currentX += sWRect.Width + 10
 		}
 
