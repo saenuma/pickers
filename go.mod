@@ -2,7 +2,7 @@ module github.com/saenuma/pickers
 
 go 1.23.6
 
-toolchain go1.24.1
+toolchain go1.24
 
 require (
 	github.com/bankole7782/graphics143 v1.2.2

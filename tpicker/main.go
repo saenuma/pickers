@@ -35,7 +35,8 @@ func main() {
 	}
 
 	// prepare words.txt for search
-	words := strings.Split(string(AllWords), "\n")
+	allWords := strings.ReplaceAll(string(AllWords), "\r", "")
+	words := strings.Split(allWords, "\n")
 	wordsByFirstCharMap = make(map[string][]string)
 	for _, word := range words {
 		arr, ok := wordsByFirstCharMap[string(word[0])]
