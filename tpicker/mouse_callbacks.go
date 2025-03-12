@@ -134,19 +134,22 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 	} else if button == glfw.MouseButtonRight {
 		lineClicked := getLineClicked()
 		rightClickedWord := getWordRightClicked(theCtx, lineClicked, xPosInt)
-		suggestions := spellcheckModel.Suggest(rightClickedWord, 30)
 
-		currentLineClicked = lineClicked
-		currentRightClickedWord = rightClickedWord
-		currentSuggestions = suggestions
+		if !isWordInDict(rightClickedWord) {
+			suggestions := spellcheckModel.Suggest(rightClickedWord, 30)
 
-		// bring up suggestions
-		suggestionsDialogShown = true
-		drawDialog(window, suggestions)
-		window.SetMouseButtonCallback(sWMouseBtnCallback)
-		// window.SetCursorPosCallback(cursorCallback)
-		window.SetKeyCallback(nil)
-		window.SetCharCallback(nil)
+			currentLineClicked = lineClicked
+			currentRightClickedWord = rightClickedWord
+			currentSuggestions = suggestions
+
+			// bring up suggestions
+			suggestionsDialogShown = true
+			drawDialog(window, suggestions)
+			window.SetMouseButtonCallback(sWMouseBtnCallback)
+			// window.SetCursorPosCallback(cursorCallback)
+			window.SetKeyCallback(nil)
+			window.SetCharCallback(nil)
+		}
 
 	}
 
