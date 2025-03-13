@@ -4,34 +4,18 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
 	g143 "github.com/bankole7782/graphics143"
 	"github.com/essentialkaos/ek/v13/spellcheck"
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/gookit/color"
 )
 
 func main() {
-	changeLoc := false
-	var windowX, windowY int
-	if len(os.Args) == 3 {
-		changeLoc = true
-		xCoord, err := strconv.Atoi(os.Args[1])
-		if err != nil {
-			color.Red.Println("First argument X was not int")
-			os.Exit(1)
-		}
-
-		yCoord, err := strconv.Atoi(os.Args[2])
-		if err != nil {
-			color.Red.Println("Second argument Y was not int")
-			os.Exit(1)
-		}
-
-		windowX, windowY = xCoord, yCoord
+	startingText := ""
+	if len(os.Args) == 2 {
+		startingText = os.Args[1]
 	}
 
 	// prepare words.txt for search
@@ -53,10 +37,10 @@ func main() {
 	objCoords = make(map[int]g143.Rect)
 
 	window := g143.NewWindow(700, 300, "sae.ng text picker", false)
-	drawTextView(window)
-	if changeLoc {
-		window.SetPos(windowX, windowY)
+	if len(os.Args) == 2 {
+		enteredTxt = startingText
 	}
+	drawTextView(window)
 
 	window.SetMouseButtonCallback(mouseBtnCallback)
 	// window.SetCursorPosCallback(cursorCallback)
