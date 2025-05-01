@@ -42,11 +42,14 @@ func isWordInDict(toFindWord string) bool {
 		return true
 	}
 	toFindWord = clearQuotes(toFindWord)
-	if strings.HasSuffix(toFindWord, ".") || strings.HasSuffix(toFindWord, ",") {
-		toFindWord = toFindWord[:len(toFindWord)-1]
+
+	validEndSymbols := []string{",", ".", "?", "!", ")"}
+	for _, sym := range validEndSymbols {
+		if strings.HasSuffix(toFindWord, sym) {
+			toFindWord = toFindWord[:len(toFindWord)-1]
+		}
 	}
 
-	// return spellcheckTrie.SearchDirect(toFindWord)
 	smallList, ok := wordsByFirstCharMap[string(toFindWord[0])]
 	if !ok {
 		return false
