@@ -207,6 +207,39 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 		}
 	}
 
+	if key == glfw.KeyLeft {
+		if caretX != Margin {
+			tmp := caretXAtSubText[:len(caretXAtSubText)-1]
+			tmpW, _ := theCtx.ggCtx.MeasureString(tmp)
+			caretX = Margin + int(tmpW)
+		}
+	}
+	if key == glfw.KeyRight {
+		if currentLine != caretXAtSubText {
+			tmp := caretXAtSubText + currentLine[len(caretXAtSubText):len(caretXAtSubText)+1]
+			tmpW, _ := theCtx.ggCtx.MeasureString(tmp)
+			caretX = Margin + int(tmpW)
+		}
+	}
+	if key == glfw.KeyUp {
+		if caretYLineNo != 0 {
+			caretY -= FontSize + LineSpacing
+			tmpCurrentLineW, _ := theCtx.ggCtx.MeasureString(enteredTxtParts[caretYLineNo-1])
+			if (int(tmpCurrentLineW) + Margin) < caretX {
+				caretX = int(tmpCurrentLineW) + Margin
+			}
+		}
+	}
+	if key == glfw.KeyDown {
+		if caretYLineNo != len(enteredTxtParts)-1 {
+			caretY += FontSize + LineSpacing
+			tmpCurrentLineW, _ := theCtx.ggCtx.MeasureString(enteredTxtParts[caretYLineNo+1])
+			if (int(tmpCurrentLineW) + Margin) < caretX {
+				caretX = int(tmpCurrentLineW) + Margin
+			}
+		}
+	}
+
 	sIRect := objCoords[MajorTextInput]
 	theCtx.drawTextInput(MajorTextInput, sIRect.OriginX, sIRect.OriginY, sIRect.Width, sIRect.Height, enteredTxt)
 
