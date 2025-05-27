@@ -283,7 +283,7 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 		return
 	}
 
-	foundImg, err := imaging.Open(foundObjectPath)
+	foundImg, err := imaging.Open(foundObjectPath, imaging.AutoOrientation(true))
 	if err != nil {
 		allDraws(window)
 		return
