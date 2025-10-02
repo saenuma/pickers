@@ -1,6 +1,7 @@
 package main
 
 import (
+	// "fmt"
 	"slices"
 	"strings"
 
@@ -30,6 +31,37 @@ func getCaretXAtSubText(theCtx Ctx, lineNo int) string {
 
 	return lineNoText
 }
+
+func lineBreak(theCtx Ctx, tmpText string, maxWidth int) []string {
+	var tmpLine string
+	lines := make([]string, 0)
+	for i, aChar := range tmpText {
+		aCharStr := string(aChar)
+		if aCharStr == "\n" {
+			lines = append(lines, tmpLine)
+			tmpLine = ""
+			continue
+		}
+
+		tmpLine += aCharStr
+		tmpLineW, _ := theCtx.ggCtx.MeasureString(tmpLine)
+		if int(tmpLineW) > maxWidth {
+			lastIndexTmpLine := len(tmpLine)-1
+			if string(tmpText[i]) == " " {
+				lines = append(lines, tmpLine[:lastIndexTmpLine])
+				tmpLine = ""
+			} else {
+				lastSpaceIndex := strings.LastIndex(tmpLine, " ")
+				lines = append(lines, tmpLine[:lastSpaceIndex+1])
+				tmpLine = tmpLine[lastSpaceIndex+1:]
+			}
+
+		}
+	}
+	lines = append(lines, tmpLine)
+	return lines
+}
+
 
 func mCharCallback(window *glfw.Window, char rune) {
 	capitalizeSentences := func(text string) string {
@@ -163,6 +195,8 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 		}
 
 		if caretYLineNo == len(enteredTxtParts)-1 && int(caretXAtSubTextW) == int(currentLineW) {
+			// the caret is at the end of the text
+
 			val := enteredTxt
 			if key == glfw.KeyBackspace && len(enteredTxt) != 0 {
 				enteredTxt = val[:len(val)-1]
@@ -193,7 +227,28 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 				caretX = Margin
 			}
 
+			// implement paste
+			if window.GetKey(glfw.KeyLeftControl) == glfw.Press && key == glfw.KeyV {
+				copiedText := glfw.GetClipboardString()
+				if len(copiedText) > 0 {
+					tmpText := enteredTxt + copiedText
+					tmpTextBroken := lineBreak(theCtx, tmpText, maxWidth)
+					enteredTxt = strings.Join(tmpTextBroken, "\n")
+					lastLine := tmpTextBroken[len(tmpTextBroken)-1]
+					lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
+					caretX = Margin + int(lastLineW)
+					caretY = Margin + ((len(tmpTextBroken)-1) * (FontSize + LineSpacing))
+					if caretX == maxWidth {
+						caretX = Margin
+						caretY += FontSize + LineSpacing
+					}
+				}
+
+			}
+
 		} else {
+			// the caret is not at the end of the input.
+
 			subTextLen := len(caretXAtSubText)
 
 			if key == glfw.KeyBackspace {
@@ -235,6 +290,30 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 				caretY += FontSize + LineSpacing
 				caretX = Margin
 			}
+
+			// implement paste
+			if window.GetKey(glfw.KeyLeftControl) == glfw.Press && key == glfw.KeyV {
+				copiedText := glfw.GetClipboardString()
+				if len(copiedText) > 0 {
+
+					enteredLine := currentLine[:subTextLen] + copiedText + currentLine[subTextLen:]
+					enteredTxtParts[caretYLineNo] = enteredLine
+
+					nEnteredTxt := strings.Join(enteredTxtParts, "\n")
+					tmpTextBroken := lineBreak(theCtx, nEnteredTxt, maxWidth)
+					enteredTxt = strings.Join(tmpTextBroken, "\n")
+					lastLine := tmpTextBroken[len(tmpTextBroken)-1]
+					lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
+					caretX = Margin + int(lastLineW)
+					caretY = Margin + ((len(tmpTextBroken)-1) * (FontSize + LineSpacing))
+					if caretX == maxWidth {
+						caretX = Margin
+						caretY += FontSize + LineSpacing
+					}
+				}
+
+			}
+
 		}
 
 		sIRect := objCoords[MajorTextInput]
