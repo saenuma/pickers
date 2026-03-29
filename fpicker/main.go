@@ -24,7 +24,7 @@ const (
 	fontSize = 20
 
 	BackBtn  = 9801
-	PageSize = 15 * 4
+	PageSize = 14 * 4
 )
 
 var (
@@ -192,6 +192,11 @@ func drawObjects(window *glfw.Window, page int) {
 			currentX += int(objW) + 20
 		}
 	}
+
+	pageLabel := fmt.Sprintf("Page %d / %d", CurrentPage, TotalPages())
+	pageLabelW, _ := ggCtx.MeasureString(pageLabel)
+	pageLabelX := (wWidth - int(pageLabelW)) / 2
+	ggCtx.DrawString(pageLabel, float64(pageLabelX), float64(wHeight)-20)
 
 	// send the frame to glfw window
 	windowRS := g143.Rect{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
