@@ -307,7 +307,10 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 
 				} else {
 					editedSubText := caretXAtSubText[:len(caretXAtSubText)-1] + currentLine[subTextLen:]
-					enteredTxtParts[caretYLineNo] = editedSubText
+					allFromEdit := editedSubText + " " + strings.Join(enteredTxtParts[caretYLineNo+1:], " ")
+					allFromEditWrapped := theCtx.ggCtx.WordWrap(allFromEdit, float64(WindowWidth))
+					enteredTxtParts = append(enteredTxtParts[:caretYLineNo], allFromEditWrapped...)
+					// enteredTxtParts[caretYLineNo] = editedSubText
 					enteredTxt = strings.Join(enteredTxtParts, "\n")
 					subTextW, _ := theCtx.ggCtx.MeasureString(caretXAtSubText[:len(caretXAtSubText)-1])
 					caretX = Margin + int(subTextW)
