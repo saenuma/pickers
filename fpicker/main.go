@@ -108,6 +108,29 @@ func shortenObject(filename string) string {
 	return tmp
 }
 
+func TotalPages() int {
+	objs := getObjects(basePath, exts)
+	return int(math.Ceil(float64(len(objs)) / float64(PageSize)))
+}
+
+func GetPageObjects(page int) []string {
+	beginIndex := (page - 1) * PageSize
+	endIndex := beginIndex + PageSize
+
+	toPickFrom := getObjects(basePath, exts)
+	var retObjects []string
+	if len(toPickFrom) <= PageSize {
+		retObjects = toPickFrom
+	} else if page == 1 {
+		retObjects = toPickFrom[:PageSize]
+	} else if endIndex > len(toPickFrom) {
+		retObjects = toPickFrom[beginIndex:]
+	} else {
+		retObjects = toPickFrom[beginIndex:endIndex]
+	}
+	return retObjects
+}
+
 func drawObjects(window *glfw.Window, page int) {
 	CurrentPage = page
 	wWidth, wHeight := window.GetSize()
@@ -249,14 +272,15 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 
 	wWidth, wHeight := window.GetSize()
 
-	// var widgetRS g143.Rect
+	var widgetRS g143.Rect
 	var widgetCode int
+	windowRS := g143.Rect{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
 
 	xPosInt := int(xpos)
 	yPosInt := int(ypos)
 	for code, RS := range objCoords {
 		if g143.InRect(RS, xPosInt, yPosInt) {
-			// widgetRS = RS
+			widgetRS = RS
 			widgetCode = code
 			break
 		}
@@ -267,6 +291,21 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 		return
 	}
 	if widgetCode == BackBtn {
+
+		rectA := image.Rect(widgetRS.OriginX, widgetRS.OriginY,
+			widgetRS.OriginX+widgetRS.Width,
+			widgetRS.OriginY+widgetRS.Height)
+
+		pieceOfCurrentFrame := imaging.Crop(tmpPickerFrame, rectA)
+		invertedPiece := imaging.AdjustBrightness(pieceOfCurrentFrame, -20)
+
+		ggCtx := gg.NewContextForImage(tmpPickerFrame)
+		ggCtx.DrawImage(invertedPiece, widgetRS.OriginX, widgetRS.OriginY)
+
+		// send the frame to glfw window
+		g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
+		window.SwapBuffers()
+
 		return
 	}
 
@@ -274,7 +313,20 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 	foundObject := toPickFrom[widgetCode-1]
 
 	if strings.HasSuffix(foundObject, "/") {
-		drawObjects(window, CurrentPage)
+		rectA := image.Rect(widgetRS.OriginX, widgetRS.OriginY,
+			widgetRS.OriginX+widgetRS.Width,
+			widgetRS.OriginY+widgetRS.Height)
+
+		pieceOfCurrentFrame := imaging.Crop(tmpPickerFrame, rectA)
+		invertedPiece := imaging.AdjustBrightness(pieceOfCurrentFrame, -20)
+
+		ggCtx := gg.NewContextForImage(tmpPickerFrame)
+		ggCtx.DrawImage(invertedPiece, widgetRS.OriginX, widgetRS.OriginY)
+
+		// send the frame to glfw window
+		g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
+		window.SwapBuffers()
+
 		return
 	}
 
@@ -288,7 +340,20 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 		}
 	}
 	if !isPicFormat {
-		drawObjects(window, CurrentPage)
+		rectA := image.Rect(widgetRS.OriginX, widgetRS.OriginY,
+			widgetRS.OriginX+widgetRS.Width,
+			widgetRS.OriginY+widgetRS.Height)
+
+		pieceOfCurrentFrame := imaging.Crop(tmpPickerFrame, rectA)
+		invertedPiece := imaging.AdjustBrightness(pieceOfCurrentFrame, -20)
+
+		ggCtx := gg.NewContextForImage(tmpPickerFrame)
+		ggCtx.DrawImage(invertedPiece, widgetRS.OriginX, widgetRS.OriginY)
+
+		// send the frame to glfw window
+		g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
+		window.SwapBuffers()
+
 		return
 	}
 
@@ -319,33 +384,9 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 	ggCtx.Fill()
 
 	// send the frame to glfw window
-	windowRS := g143.Rect{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
 	g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
 	window.SwapBuffers()
 
-}
-
-func TotalPages() int {
-	objs := getObjects(basePath, exts)
-	return int(math.Ceil(float64(len(objs)) / float64(PageSize)))
-}
-
-func GetPageObjects(page int) []string {
-	beginIndex := (page - 1) * PageSize
-	endIndex := beginIndex + PageSize
-
-	toPickFrom := getObjects(basePath, exts)
-	var retObjects []string
-	if len(toPickFrom) <= PageSize {
-		retObjects = toPickFrom
-	} else if page == 1 {
-		retObjects = toPickFrom[:PageSize]
-	} else if endIndex > len(toPickFrom) {
-		retObjects = toPickFrom[beginIndex:]
-	} else {
-		retObjects = toPickFrom[beginIndex:endIndex]
-	}
-	return retObjects
 }
 
 func scrollBtnCB(window *glfw.Window, xoff, yoff float64) {
