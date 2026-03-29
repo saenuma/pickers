@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -22,16 +23,19 @@ const (
 	fps      = 10
 	fontSize = 20
 
-	BackBtn = 9801
+	BackBtn  = 9801
+	PageSize = 15 * 4
 )
 
-var objCoords map[int]g143.Rect
-
-var rootPath string
-var basePath string
-var exts string
-
-var tmpPickerFrame image.Image
+var (
+	objCoords        map[int]g143.Rect
+	rootPath         string
+	basePath         string
+	exts             string
+	tmpPickerFrame   image.Image
+	scrollEventCount int
+	CurrentPage      int
+)
 
 func main() {
 	if len(os.Args) != 3 {
@@ -46,11 +50,12 @@ func main() {
 	objCoords = make(map[int]g143.Rect)
 
 	window := g143.NewWindow(1200, 800, "sae.ng file picker", false)
-	allDraws(window)
+	drawObjects(window, 1)
 
 	// respond to the mouse
 	window.SetMouseButtonCallback(mouseBtnCallback)
 	window.SetCursorPosCallback(cursorCallback)
+	window.SetScrollCallback(scrollBtnCB)
 
 	for !window.ShouldClose() {
 		t := time.Now()
@@ -103,9 +108,8 @@ func shortenObject(filename string) string {
 	return tmp
 }
 
-func allDraws(window *glfw.Window) {
-	toPickFrom := getObjects(basePath, exts)
-
+func drawObjects(window *glfw.Window, page int) {
+	CurrentPage = page
 	wWidth, wHeight := window.GetSize()
 
 	// frame buffer
@@ -134,6 +138,7 @@ func allDraws(window *glfw.Window) {
 	currentX := 20
 	currentY := 50
 
+	toPickFrom := GetPageObjects(page)
 	for i, aFile := range toPickFrom {
 		shortAFile := shortenObject(aFile)
 		// aFileStrW, _ := ggCtx.MeasureString(shortAFile)
@@ -209,19 +214,19 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 		if strings.Count(rootPathTmp, "/") < strings.Count(tmp, "/")+1 {
 			objCoords = make(map[int]g143.Rect)
 			basePath = tmp
-			allDraws(window)
+			drawObjects(window, CurrentPage)
 		}
 
 		return
 	}
 
-	toPickFrom := getObjects(basePath, exts)
+	toPickFrom := GetPageObjects(CurrentPage)
 	foundObject := toPickFrom[widgetCode-1]
 
 	if strings.HasSuffix(foundObject, "/") {
 		objCoords = make(map[int]g143.Rect)
 		basePath = filepath.Join(basePath, foundObject)
-		allDraws(window)
+		drawObjects(window, CurrentPage)
 	} else {
 		fmt.Println(filepath.Join(basePath, foundObject))
 		window.SetShouldClose(true)
@@ -258,7 +263,7 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 	}
 
 	if widgetCode == 0 {
-		allDraws(window)
+		drawObjects(window, CurrentPage)
 		return
 	}
 	if widgetCode == BackBtn {
@@ -269,7 +274,7 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 	foundObject := toPickFrom[widgetCode-1]
 
 	if strings.HasSuffix(foundObject, "/") {
-		allDraws(window)
+		drawObjects(window, CurrentPage)
 		return
 	}
 
@@ -283,13 +288,13 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 		}
 	}
 	if !isPicFormat {
-		allDraws(window)
+		drawObjects(window, CurrentPage)
 		return
 	}
 
 	foundImg, err := imaging.Open(foundObjectPath, imaging.AutoOrientation(true))
 	if err != nil {
-		allDraws(window)
+		drawObjects(window, CurrentPage)
 		return
 	}
 	previewImgBoxSize := 300
@@ -297,7 +302,7 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 	foundImg = imaging.Fit(foundImg, previewImgBoxSize, previewImgBoxSize, imaging.Lanczos)
 
 	objCoords = make(map[int]g143.Rect)
-	allDraws(window)
+	drawObjects(window, CurrentPage)
 
 	previewX := xPosInt + 10
 	if previewX+previewImgBoxSize > wWidth {
@@ -317,5 +322,49 @@ func cursorCallback(window *glfw.Window, xpos, ypos float64) {
 	windowRS := g143.Rect{Width: wWidth, Height: wHeight, OriginX: 0, OriginY: 0}
 	g143.DrawImage(wWidth, wHeight, ggCtx.Image(), windowRS)
 	window.SwapBuffers()
+
+}
+
+func TotalPages() int {
+	objs := getObjects(basePath, exts)
+	return int(math.Ceil(float64(len(objs)) / float64(PageSize)))
+}
+
+func GetPageObjects(page int) []string {
+	beginIndex := (page - 1) * PageSize
+	endIndex := beginIndex + PageSize
+
+	toPickFrom := getObjects(basePath, exts)
+	var retObjects []string
+	if len(toPickFrom) <= PageSize {
+		retObjects = toPickFrom
+	} else if page == 1 {
+		retObjects = toPickFrom[:PageSize]
+	} else if endIndex > len(toPickFrom) {
+		retObjects = toPickFrom[beginIndex:]
+	} else {
+		retObjects = toPickFrom[beginIndex:endIndex]
+	}
+	return retObjects
+}
+
+func scrollBtnCB(window *glfw.Window, xoff, yoff float64) {
+
+	if scrollEventCount != 5 {
+		scrollEventCount += 1
+		return
+	}
+
+	scrollEventCount = 0
+
+	if xoff == 0 && yoff == -1 && CurrentPage != TotalPages() {
+		objCoords = make(map[int]g143.Rect)
+		drawObjects(window, CurrentPage+1)
+		window.SetCursorPosCallback(cursorCallback)
+	} else if xoff == 0 && yoff == 1 && CurrentPage != 1 {
+		objCoords = make(map[int]g143.Rect)
+		drawObjects(window, CurrentPage-1)
+		window.SetCursorPosCallback(cursorCallback)
+	}
 
 }
