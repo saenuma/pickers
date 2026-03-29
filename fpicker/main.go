@@ -93,10 +93,12 @@ func getObjects(rootPath, mergedExts string) []string {
 func shortenObject(filename string) string {
 	var tmp string
 	if len(filename) > 30 {
-		tmp = filename[0:20] + "..." + filename[len(filename)-6:]
+		tmp = filename[0:15] + "..." + filename[len(filename)-6:]
 	} else {
 		tmp = filename
 	}
+
+	strings.TrimPrefix(tmp, "/")
 
 	return tmp
 }
@@ -129,35 +131,37 @@ func allDraws(window *glfw.Window) {
 	ggCtx.SetHexColor("#444")
 	ggCtx.DrawString(basePath, 60, 5+20)
 
-	// draw divider
-	ggCtx.SetHexColor("#bbb")
-	ggCtx.DrawRectangle(5, 40, float64(wWidth)-10, 2)
-	ggCtx.Fill()
-
 	currentX := 20
 	currentY := 50
 
 	for i, aFile := range toPickFrom {
 		shortAFile := shortenObject(aFile)
-		aFileStrW, _ := ggCtx.MeasureString(shortAFile)
+		// aFileStrW, _ := ggCtx.MeasureString(shortAFile)
+		objW := 270
 
 		if strings.HasSuffix(aFile, "/") {
-			ggCtx.SetHexColor("#9e9770")
-			ggCtx.DrawString(shortAFile, float64(currentX), float64(currentY)+fontSize)
+			ggCtx.SetHexColor("#444")
+			ggCtx.DrawRoundedRectangle(float64(currentX), float64(currentY), float64(objW)+10, fontSize+20, 4)
+			ggCtx.Fill()
+			ggCtx.SetHexColor("#fff")
+			ggCtx.DrawRoundedRectangle(float64(currentX)+1, float64(currentY)+1, float64(objW)+10-2, fontSize+20-2, 2)
+			ggCtx.Fill()
+			ggCtx.SetHexColor("#444")
+			ggCtx.DrawString(shortAFile, float64(currentX+5), float64(currentY)+fontSize+10)
 		} else {
 			ggCtx.SetHexColor("#444")
-			ggCtx.DrawString(shortAFile, float64(currentX), float64(currentY)+fontSize)
+			ggCtx.DrawString(shortAFile, float64(currentX+5), float64(currentY)+fontSize+10)
 		}
 
-		aFileRS := g143.Rect{OriginX: currentX, OriginY: currentY, Width: int(aFileStrW), Height: fontSize}
+		aFileRS := g143.Rect{OriginX: currentX, OriginY: currentY, Width: int(objW) + 10, Height: fontSize + 20}
 		objCoords[i+1] = aFileRS
 
-		newX := currentX + int(aFileStrW) + 20
-		if newX > (wWidth - int(aFileStrW)) {
-			currentY += 40
+		newX := currentX + int(objW) + 10
+		if newX > (wWidth - int(objW)) {
+			currentY += fontSize + 20 + 10
 			currentX = 20
 		} else {
-			currentX += int(aFileStrW) + 20 + 10
+			currentX += int(objW) + 20
 		}
 	}
 
