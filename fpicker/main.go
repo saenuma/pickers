@@ -197,7 +197,7 @@ func mouseBtnCallback(window *glfw.Window, button glfw.MouseButton, action glfw.
 
 	if widgetCode == BackBtn {
 		tmp := filepath.Dir(basePath)
-		var rootPathTmp string
+		rootPathTmp := rootPath
 		if strings.HasSuffix(rootPath, "/") {
 			rootPathTmp = rootPath[:len(rootPath)-1]
 		}
