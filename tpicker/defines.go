@@ -17,6 +17,9 @@ const (
 	MajorTextInput = 102
 
 	SWD_CloseBtn = 201
+
+	WindowWidth  = 700
+	WindowHeight = 300
 )
 
 var (

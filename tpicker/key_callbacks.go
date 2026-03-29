@@ -2,6 +2,7 @@ package main
 
 import (
 	// "fmt"
+
 	"slices"
 	"strings"
 
@@ -32,6 +33,15 @@ func getCaretXAtSubText(theCtx Ctx, lineNo int) string {
 	return lineNoText
 }
 
+func findLastSpace(line string) int {
+	for i := len(line) - 1; i >= 0; i -= 1 {
+		if string(line[i]) == " " {
+			return i + 1
+		}
+	}
+	return -1
+}
+
 func lineBreak(theCtx Ctx, tmpText string, maxWidth int) []string {
 	var tmpLine string
 	lines := make([]string, 0)
@@ -46,7 +56,7 @@ func lineBreak(theCtx Ctx, tmpText string, maxWidth int) []string {
 		tmpLine += aCharStr
 		tmpLineW, _ := theCtx.ggCtx.MeasureString(tmpLine)
 		if int(tmpLineW) > maxWidth {
-			lastIndexTmpLine := len(tmpLine)-1
+			lastIndexTmpLine := len(tmpLine) - 1
 			if string(tmpText[i]) == " " {
 				lines = append(lines, tmpLine[:lastIndexTmpLine])
 				tmpLine = ""
@@ -62,6 +72,10 @@ func lineBreak(theCtx Ctx, tmpText string, maxWidth int) []string {
 	return lines
 }
 
+// func wordWrap(theCtx Ctx, lines string) []string {
+
+// 	theCtx.ggCtx.wo`
+// }
 
 func mCharCallback(window *glfw.Window, char rune) {
 	capitalizeSentences := func(text string) string {
@@ -95,12 +109,20 @@ func mCharCallback(window *glfw.Window, char rune) {
 		tmpEnteredLine := currentLine + string(char)
 		tmpEnteredLineW, _ := theCtx.ggCtx.MeasureString(tmpEnteredLine)
 		if int(tmpEnteredLineW) > maxWidth {
-			currentLine = currentLine + "\n" + string(char)
+			if string(char) == " " {
+				currentLine = currentLine + "\n" + string(char)
+				charW, _ := theCtx.ggCtx.MeasureString(string(char))
+				caretX = Margin + int(charW)
+			} else {
+				// currentLine = currentLine[:len(currentLine)-1] + "\n" + string(currentLine[len(currentLine)-1]) + string(char)
+				lastSpaceIndex := findLastSpace(currentLine)
+				currentLine = currentLine[:lastSpaceIndex] + "\n" + currentLine[lastSpaceIndex:] + string(char)
+				charsW, _ := theCtx.ggCtx.MeasureString(currentLine[lastSpaceIndex:] + string(char))
+				caretX = Margin + int(charsW)
+			}
 			enteredTxtParts[caretYLineNo] = currentLine
 			enteredTxt = strings.Join(enteredTxtParts, "\n")
 			caretY += FontSize + LineSpacing
-			charW, _ := theCtx.ggCtx.MeasureString(string(char))
-			caretX = Margin + int(charW)
 		} else {
 			enteredTxtParts[caretYLineNo] = tmpEnteredLine
 			enteredTxt = strings.Join(enteredTxtParts, "\n")
@@ -116,11 +138,20 @@ func mCharCallback(window *glfw.Window, char rune) {
 			tmpText := currentLine[:subTextLen] + string(char)
 			tmpTextW, _ := theCtx.ggCtx.MeasureString(tmpText)
 			if int(tmpTextW) > maxWidth {
-				enteredLine := currentLine[:subTextLen] + "\n" + string(char) + currentLine[subTextLen:]
-				enteredTxtParts[caretYLineNo] = enteredLine
-				enteredTxt = strings.Join(enteredTxtParts, "\n")
-				charW, _ := theCtx.ggCtx.MeasureString(string(char))
-				caretX = Margin + int(charW)
+				if string(char) == " " {
+					enteredLine := currentLine[:subTextLen] + "\n" + string(char) + currentLine[subTextLen:]
+					enteredTxtParts[caretYLineNo] = enteredLine
+					enteredTxt = strings.Join(enteredTxtParts, "\n")
+					charW, _ := theCtx.ggCtx.MeasureString(string(char))
+					caretX = Margin + int(charW)
+				} else {
+					lastSpaceIndex := findLastSpace(currentLine)
+					enteredLine := currentLine[:lastSpaceIndex] + "\n" + currentLine[lastSpaceIndex:] + string(char)
+					enteredTxtParts[caretYLineNo] = enteredLine
+					enteredTxt = strings.Join(enteredTxtParts, "\n")
+					charsW, _ := theCtx.ggCtx.MeasureString(currentLine[lastSpaceIndex:] + string(char))
+					caretX = Margin + int(charsW)
+				}
 				caretY += FontSize + Margin
 			} else {
 				enteredLine := currentLine[:subTextLen] + string(char) + "\n" + currentLine[subTextLen:]
@@ -237,7 +268,7 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 					lastLine := tmpTextBroken[len(tmpTextBroken)-1]
 					lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
 					caretX = Margin + int(lastLineW)
-					caretY = Margin + ((len(tmpTextBroken)-1) * (FontSize + LineSpacing))
+					caretY = Margin + ((len(tmpTextBroken) - 1) * (FontSize + LineSpacing))
 					if caretX == maxWidth {
 						caretX = Margin
 						caretY += FontSize + LineSpacing
@@ -305,7 +336,7 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 					lastLine := tmpTextBroken[len(tmpTextBroken)-1]
 					lastLineW, _ := theCtx.ggCtx.MeasureString(lastLine)
 					caretX = Margin + int(lastLineW)
-					caretY = Margin + ((len(tmpTextBroken)-1) * (FontSize + LineSpacing))
+					caretY = Margin + ((len(tmpTextBroken) - 1) * (FontSize + LineSpacing))
 					if caretX == maxWidth {
 						caretX = Margin
 						caretY += FontSize + LineSpacing

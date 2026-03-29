@@ -36,7 +36,7 @@ func main() {
 
 	objCoords = make(map[int]g143.Rect)
 
-	window := g143.NewWindow(700, 300, "sae.ng text picker", false)
+	window := g143.NewWindow(WindowWidth, WindowHeight, "sae.ng text picker", false)
 	if len(os.Args) == 2 {
 		enteredTxt = startingText
 	}
