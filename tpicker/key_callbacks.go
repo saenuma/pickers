@@ -72,11 +72,6 @@ func lineBreak(theCtx Ctx, tmpText string, maxWidth int) []string {
 	return lines
 }
 
-// func wordWrap(theCtx Ctx, lines string) []string {
-
-// 	theCtx.ggCtx.wo`
-// }
-
 func mCharCallback(window *glfw.Window, char rune) {
 	capitalizeSentences := func(text string) string {
 		textParts := strings.Split(text, ". ")
@@ -209,19 +204,17 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 		if key == glfw.KeyUp {
 			if caretYLineNo != 0 {
 				caretY -= FontSize + LineSpacing
-				tmpCurrentLineW, _ := theCtx.ggCtx.MeasureString(enteredTxtParts[caretYLineNo-1])
-				if (int(tmpCurrentLineW) + Margin) < caretX {
-					caretX = int(tmpCurrentLineW) + Margin
-				}
+				possibleNewSubtext := enteredTxtParts[caretYLineNo-1][:len(caretXAtSubText)]
+				possibleNewSubtextW, _ := theCtx.ggCtx.MeasureString(possibleNewSubtext)
+				caretX = Margin + int(possibleNewSubtextW)
 			}
 		}
 		if key == glfw.KeyDown {
 			if caretYLineNo != len(enteredTxtParts)-1 {
 				caretY += FontSize + LineSpacing
-				tmpCurrentLineW, _ := theCtx.ggCtx.MeasureString(enteredTxtParts[caretYLineNo+1])
-				if (int(tmpCurrentLineW) + Margin) < caretX {
-					caretX = int(tmpCurrentLineW) + Margin
-				}
+				possibleNewSubtext := enteredTxtParts[caretYLineNo+1][:len(caretXAtSubText)]
+				possibleNewSubtextW, _ := theCtx.ggCtx.MeasureString(possibleNewSubtext)
+				caretX = Margin + int(possibleNewSubtextW)
 			}
 		}
 
