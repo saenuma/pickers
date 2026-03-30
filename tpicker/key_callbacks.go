@@ -204,17 +204,29 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 		if key == glfw.KeyUp {
 			if caretYLineNo != 0 {
 				caretY -= FontSize + LineSpacing
-				possibleNewSubtext := enteredTxtParts[caretYLineNo-1][:len(caretXAtSubText)]
-				possibleNewSubtextW, _ := theCtx.ggCtx.MeasureString(possibleNewSubtext)
-				caretX = Margin + int(possibleNewSubtextW)
+				nCurrentLine := enteredTxtParts[caretYLineNo-1]
+				if len(nCurrentLine) >= len(caretXAtSubText) {
+					possibleNewSubtext := nCurrentLine[:len(caretXAtSubText)]
+					possibleNewSubtextW, _ := theCtx.ggCtx.MeasureString(possibleNewSubtext)
+					caretX = Margin + int(possibleNewSubtextW)
+				} else {
+					nCurrentLineW, _ := theCtx.ggCtx.MeasureString(nCurrentLine)
+					caretX = Margin + int(nCurrentLineW)
+				}
 			}
 		}
 		if key == glfw.KeyDown {
 			if caretYLineNo != len(enteredTxtParts)-1 {
 				caretY += FontSize + LineSpacing
-				possibleNewSubtext := enteredTxtParts[caretYLineNo+1][:len(caretXAtSubText)]
-				possibleNewSubtextW, _ := theCtx.ggCtx.MeasureString(possibleNewSubtext)
-				caretX = Margin + int(possibleNewSubtextW)
+				nCurrentLine := enteredTxtParts[caretYLineNo+1]
+				if len(nCurrentLine) >= len(caretXAtSubText) {
+					possibleNewSubtext := nCurrentLine[:len(caretXAtSubText)]
+					possibleNewSubtextW, _ := theCtx.ggCtx.MeasureString(possibleNewSubtext)
+					caretX = Margin + int(possibleNewSubtextW)
+				} else {
+					nCurrentLineW, _ := theCtx.ggCtx.MeasureString(nCurrentLine)
+					caretX = Margin + int(nCurrentLineW)
+				}
 			}
 		}
 
@@ -255,7 +267,7 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 			if window.GetKey(glfw.KeyLeftControl) == glfw.Press && key == glfw.KeyV {
 				copiedText := glfw.GetClipboardString()
 				if len(copiedText) > 0 {
-					tmpText := enteredTxt + copiedText
+					tmpText := enteredTxt + " " + copiedText
 					tmpTextBroken := lineBreak(theCtx, tmpText, maxWidth)
 					enteredTxt = strings.Join(tmpTextBroken, "\n")
 					lastLine := tmpTextBroken[len(tmpTextBroken)-1]
@@ -300,8 +312,9 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 
 				} else {
 					editedSubText := caretXAtSubText[:len(caretXAtSubText)-1] + currentLine[subTextLen:]
-					allFromEdit := editedSubText + " " + strings.Join(enteredTxtParts[caretYLineNo+1:], " ")
-					allFromEditWrapped := theCtx.ggCtx.WordWrap(allFromEdit, float64(WindowWidth))
+					allFromEdit := editedSubText + " " + strings.Join(enteredTxtParts[caretYLineNo+1:], "\n")
+					allFromEditWrapped := theCtx.ggCtx.WordWrap(allFromEdit, float64(maxWidth))
+					// allFromEditWrapped := lineBreak(theCtx, allFromEdit, maxWidth)
 					enteredTxtParts = append(enteredTxtParts[:caretYLineNo], allFromEditWrapped...)
 					// enteredTxtParts[caretYLineNo] = editedSubText
 					enteredTxt = strings.Join(enteredTxtParts, "\n")
@@ -323,7 +336,7 @@ func mKeyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.A
 				copiedText := glfw.GetClipboardString()
 				if len(copiedText) > 0 {
 
-					enteredLine := currentLine[:subTextLen] + copiedText + currentLine[subTextLen:]
+					enteredLine := currentLine[:subTextLen] + " " + copiedText + " " + currentLine[subTextLen:]
 					enteredTxtParts[caretYLineNo] = enteredLine
 
 					nEnteredTxt := strings.Join(enteredTxtParts, "\n")

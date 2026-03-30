@@ -43,7 +43,7 @@ func isWordInDict(toFindWord string) bool {
 	}
 	toFindWord = clearQuotes(toFindWord)
 
-	validEndSymbols := []string{",", ".", "?", "!", ")"}
+	validEndSymbols := []string{",", ".", "?", "!", ")", ":"}
 	for _, sym := range validEndSymbols {
 		if strings.HasSuffix(toFindWord, sym) {
 			toFindWord = toFindWord[:len(toFindWord)-1]
