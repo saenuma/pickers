@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	fps      = 10
+	fps      = 24
 	fontSize = 20
 
 	AllColorBox = 31
